@@ -1,3 +1,4 @@
+import fswin from "fswin";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import cmd from "child_process";
 import { BrowserWindow, app, dialog, ipcMain, shell } from "electron";
@@ -9,6 +10,8 @@ import { doesFileExist } from "./doesFileExist";
 import { JSONFileWrapper } from "./JSONFileWrapper";
 
 const USERPROFILE = os.homedir();
+const WILDCARD = "*";
+
 let MAIN_WINDOW: BrowserWindow;
 
 function createWindow(): void {
@@ -38,9 +41,31 @@ function createWindow(): void {
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     MAIN_WINDOW.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+    installDevExtensions();
   } else {
     MAIN_WINDOW.loadFile(join(__dirname, "../renderer/index.html"));
   }
+}
+
+async function installDevExtensions(): Promise<void> {
+  const electronDevToolsExtension = await import("electron-devtools-installer");
+
+  const installExtension = electronDevToolsExtension.default;
+  const { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = electronDevToolsExtension;
+
+  Promise.resolve()
+    .then(() => installExtension(REACT_DEVELOPER_TOOLS))
+    .then(() => installExtension(REDUX_DEVTOOLS))
+    .then(() => {
+      // MAIN_WINDOW.webContents.openDevTools({ mode: "detach" });
+      MAIN_WINDOW.webContents.openDevTools();
+    })
+    .then(() => {
+      console.log("=====\n[EXTENSIONS] installed successfully\n=====\n");
+    })
+    .catch((error: any) => {
+      console.log(`=====\n[EXTENSIONS] an error occurred :: ${error}\n=====\n`);
+    });
 }
 
 // This method will be called when Electron has finished
@@ -75,7 +100,7 @@ app.on("window-all-closed", () => {
   }
 });
 
-// In this file you can include the rest of your app"s specific main process
+// In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
 const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
@@ -152,26 +177,50 @@ ipcMain.handle("IS_FOLDER", async (event, arg) => {
   }
 });
 
-ipcMain.handle("GET_DIRECTORY_CONTENTS", async (event, arg) => {
-  try {
-    const folderPath = arg;
-    const directoryContents = await fs.promises.readdir(folderPath);
-    return directoryContents;
-  } catch (error: any) {
-    if (error.code === "EPERM" || error.code === "EBUSY" || error.code === "EACCES") {
-      // exclude this item
-      return undefined;
-    } else {
-      // uncaught error
-      throw error;
-    }
-  }
+ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
+  const folderPath = arg;
+  const folderPathWithTrailingWildcard = path.win32.join(folderPath, WILDCARD);
+
+  return new Promise((resolve, reject) => {
+    fswin.find(folderPathWithTrailingWildcard, (files) => {
+      resolve(files);
+    });
+  });
+
+  // try {
+  //   const folderPath = arg;
+  //   const directoryContents = await fs.promises.readdir(folderPath);
+  //   return directoryContents;
+  // } catch (error: any) {
+  //   if (error.code === "EPERM" || error.code === "EBUSY" || error.code === "EACCES") {
+  //     // exclude this item
+  //     return undefined;
+  //   } else {
+  //     // uncaught error
+  //     throw error;
+  //   }
+  // }
 });
 
-ipcMain.handle("GET_FILE_STATS", async (event, arg) => {
+ipcMain.handle("GET_FS_STATS", async (event, arg) => {
   const fullPath = arg;
   const stats = await fs.promises.stat(fullPath);
   return stats;
+  // TODO: use fswin
+});
+
+ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
+  return new Promise<fswin.LogicalDriveList>((resolve, reject) => {
+    fswin.getLogicalDriveList((result) => {
+      resolve(result);
+    });
+  });
+});
+
+ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
+  // TODO: check settings
+  // return __dirname;
+  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
 });
 
 ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
