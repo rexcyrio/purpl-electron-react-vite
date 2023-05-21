@@ -5,7 +5,8 @@ import fs from "fs";
 import os from "os";
 import path, { join } from "path";
 import icon from "../../resources/icon.png?asset";
-import JSONFileWrapper from "./JSONFileWrapper";
+import { doesFileExist } from "./doesFileExist";
+import { JSONFileWrapper } from "./JSONFileWrapper";
 
 const USERPROFILE = os.homedir();
 let MAIN_WINDOW: BrowserWindow;
@@ -193,20 +194,3 @@ ipcMain.on("ondragstart", (event, filePath) => {
     icon: icon
   });
 });
-
-// ============================================================================
-// helper
-// ============================================================================
-
-async function doesFileExist(fullPath: string): Promise<boolean> {
-  try {
-    await fs.promises.access(fullPath, fs.constants.F_OK);
-    return true;
-  } catch (error: any) {
-    if (error.code === "ENOENT") {
-      return false;
-    } else {
-      throw error;
-    }
-  }
-}
