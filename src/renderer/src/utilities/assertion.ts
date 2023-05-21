@@ -1,0 +1,13 @@
+export class AssertionError extends Error {}
+
+export function assertTrue(fn: () => boolean): void {
+  if (fn() !== true) {
+    throw new AssertionError();
+  }
+}
+
+export function assertFalse(fn: () => boolean): void {
+  if (fn() !== false) {
+    throw new AssertionError();
+  }
+}
