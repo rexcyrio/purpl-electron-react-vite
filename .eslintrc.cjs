@@ -31,7 +31,16 @@ module.exports = {
     "@typescript-eslint/no-empty-function": ["error", { allow: ["arrowFunctions"] }],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-var-requires": "off"
+    "@typescript-eslint/no-var-requires": "off",
+    "no-restricted-imports": "off",
+    "@typescript-eslint/no-restricted-imports": [
+      "warn",
+      {
+        name: "react-redux",
+        importNames: ["useSelector", "useDispatch"],
+        message: "Use typed hooks `useAppDispatch` and `useAppSelector` instead."
+      }
+    ]
   },
   overrides: [
     {

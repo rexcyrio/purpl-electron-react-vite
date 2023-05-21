@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { AnyAction, createSlice, Dispatch, ThunkAction } from "@reduxjs/toolkit";
 import {
   getActiveItem_columnIndex,
   getActiveItem_rowIndex,
@@ -15,18 +15,16 @@ import {
   getSelectedItem,
   getSelectedItem_rowIndex,
   isColumn,
-  isFolder_activeItem,
-  SPECIAL_BLANK_STRING,
-  SPECIAL_FILE_STRING,
-  SPECIAL_LOADING_STRING
+  isFolder_activeItem
 } from "../helper/itemsSliceHelper";
-import { SynchronisationQueue } from "../helper/SynchronisationQueue";
-import { setCreateNewFolderDialogOpen } from "./createNewFolderSlice";
-import { openErrorSnackbar } from "./errorSnackbarSlice";
+import { SynchronisationQueue } from "../../utilities/SynchronisationQueue";
+import { RootState } from "../store";
+import { setIsCreateNewFolderDialogOpen } from "./isCreateNewFolderDialogOpenSlice";
+import { openErrorSnackbarWithAlertText } from "./errorSnackbarSlice";
 import { setIsReady } from "./isReadySlice";
-import { updateQuickLookIfNeeded } from "./quickLookSlice";
+import { AssertionError } from "@renderer/utilities/assertion";
 
-const initialState = {
+const initialState: { allItems: Purpl.Item[][]; indices: number[] } = {
   allItems: [],
   indices: []
 };
@@ -159,14 +157,14 @@ const {
   _replaceColumn
 } = itemsSlice.actions;
 
-export function initReduxStore() {
+export function initReduxStore(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const pathSegments = getPathSegments_nodejsDirname();
 
     const allItems = await getAllItems(pathSegments);
     dispatch(_setAllItems(allItems));
 
-    const indices = [];
+    const indices: number[] = [];
 
     for (let i = 0; i < pathSegments.length; i++) {
       const items = allItems[i];
@@ -187,10 +185,14 @@ export function initReduxStore() {
   };
 }
 
-export function upArrow() {
+export function upArrow(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const state = getState();
     const activeItem_rowIndex = state.items.indices.at(-1);
+
+    if (activeItem_rowIndex === undefined) {
+      throw new AssertionError();
+    }
 
     if (activeItem_rowIndex === -1) {
       return;
@@ -206,11 +208,15 @@ export function upArrow() {
   };
 }
 
-export function downArrow() {
+export function downArrow(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const state = getState();
     const activeItem_rowIndex = state.items.indices.at(-1);
     const activeItem_columnIndex = state.items.indices.length - 1;
+
+    if (activeItem_rowIndex === undefined) {
+      throw new AssertionError();
+    }
 
     if (activeItem_rowIndex === -1) {
       return;
@@ -227,7 +233,7 @@ export function downArrow() {
   };
 }
 
-export function leftArrow() {
+export function leftArrow(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const state = getState();
     const activeItem_rowIndex = getActiveItem_rowIndex(state);
@@ -242,9 +248,9 @@ export function leftArrow() {
   };
 }
 
-const QUEUE = new SynchronisationQueue("rightArrow");
+const QUEUE = new SynchronisationQueue();
 
-export function rightArrow() {
+export function rightArrow(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const ticket = QUEUE.generateTicket();
 
@@ -288,7 +294,9 @@ export function rightArrow() {
   };
 }
 
-export function refreshColumn(columnIndex) {
+export function refreshColumn(
+  columnIndex: number
+): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const state = getState();
 
@@ -329,11 +337,11 @@ export function refreshColumn(columnIndex) {
       }
     }
 
-    dispatch(setCreateNewFolderDialogOpen(false));
+    dispatch(setIsCreateNewFolderDialogOpen(false));
   };
 }
 
-export function refreshPreviewColumn() {
+export function refreshPreviewColumn(): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const pathSegments = getPathSegments_activeItem(getState());
     const items = await getItems(pathSegments);
@@ -342,7 +350,10 @@ export function refreshPreviewColumn() {
   };
 }
 
-export function navigateTo(columnIndex, rowIndex) {
+export function navigateTo(
+  columnIndex: number,
+  rowIndex: number
+): ThunkAction<void, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState) {
     const state = getState();
 
@@ -398,13 +409,13 @@ export function navigateTo(columnIndex, rowIndex) {
 }
 
 export function removeColumnsToTheRightOf(columnIndex) {
-  return async function thunk(dispatch, getState) {
+  return async function thunk(dispatch: Dispatch, getState: () => RootState): Promise<void> {
     dispatch(_removeColumnsToTheRightOf(columnIndex));
   };
 }
 
 export function openFileExplorer() {
-  return async function thunk(dispatch, getState) {
+  return async function thunk(dispatch: Dispatch, getState: () => RootState): Promise<void> {
     const state = getState();
 
     const pathSegments = getPathSegments_directoryOfActiveItem(state);
@@ -414,8 +425,8 @@ export function openFileExplorer() {
   };
 }
 
-export function moveItem(from_columnIndex, from_rowIndex, to_columnIndex) {
-  return async function thunk(dispatch, getState) {
+export function moveItem(from_columnIndex: number, from_rowIndex: number, to_columnIndex: number) {
+  return async function thunk(dispatch: Dispatch, getState: () => RootState): Promise<void> {
     const state = getState();
     const itemBeingMoved = state.items.allItems[from_columnIndex][from_rowIndex];
     const itemBeingMovedName = getItemName(itemBeingMoved);
@@ -434,9 +445,9 @@ export function moveItem(from_columnIndex, from_rowIndex, to_columnIndex) {
 
     try {
       await window.api.invoke("MOVE_ITEM", { from_fullPath, to_fullPath });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      dispatch(openErrorSnackbar(error.toString()));
+      dispatch(openErrorSnackbarWithAlertText(error.toString()));
     }
 
     // TODO: refresh
