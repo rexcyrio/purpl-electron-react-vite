@@ -33,6 +33,7 @@ import { sleep } from "@renderer/utilities/sleep";
 import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderFirst";
 import { RootState } from "../store";
 import { setIsReady } from "./isReadySlice";
+import { getPreviewColumn } from "@renderer/utilities/getPreviewColumn";
 
 export interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
@@ -302,13 +303,10 @@ export function addPreviewColumn(): ThunkAction<Promise<void>, RootState, unknow
 
     // check that the column we are replacing is *actually* the old `loadingColumn`
     const state = getState();
-    const columnIndexOfPreviewColumn = state.fileExplorerItems.indices.length;
-    const columnToBeUpdated = getColumn(state, columnIndexOfPreviewColumn);
+    const columnToBeReplaced = getPreviewColumn(state);
 
-    if (columnToBeUpdated === loadingColumn) {
+    if (columnToBeReplaced === loadingColumn) {
       dispatch(_updatePreviewColumn(newPreviewColumn));
-    } else {
-      console.log("good catch!");
     }
   };
 }
@@ -322,13 +320,10 @@ export function updatePreviewColumn(): ThunkAction<Promise<void>, RootState, unk
 
     // check that the column we are replacing is *actually* the old `loadingColumn`
     const state = getState();
-    const columnIndexOfPreviewColumn = state.fileExplorerItems.indices.length;
-    const columnToBeUpdated = getColumn(state, columnIndexOfPreviewColumn);
+    const columnToBeReplaced = getPreviewColumn(state);
 
-    if (columnToBeUpdated === loadingColumn) {
+    if (columnToBeReplaced === loadingColumn) {
       dispatch(_updatePreviewColumn(newPreviewColumn));
-    } else {
-      console.log("good catch!");
     }
   };
 }
