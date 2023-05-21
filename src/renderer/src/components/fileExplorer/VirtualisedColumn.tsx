@@ -10,7 +10,7 @@ import {
 } from "../../utilities/common";
 import { getColumn } from "../../utilities/getColumn";
 import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "../../utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
-import { getRowIndex } from "../../utilities/getRowIndex";
+import { getRowIndexElseNegativeOne } from "../../utilities/getRowIndex";
 import ColumnBlank from "./ColumnBlank";
 import ColumnEmptyFolder from "./ColumnEmptyFolder";
 import ColumnFileInfo from "./ColumnFileInfo";
@@ -34,7 +34,9 @@ function VirtualisedColumn({ columnIndex }): JSX.Element {
     return columnIndex;
   });
 
-  const selectedRowIndex = useAppSelector((state) => getRowIndex(state, columnIndex));
+  const selectedRowIndex = useAppSelector((state) =>
+    getRowIndexElseNegativeOne(state, columnIndex)
+  );
 
   const scrollSelectedItemIntoView = useCallback(() => {
     if (fixedSizeListRef.current === null) {

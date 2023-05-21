@@ -256,8 +256,6 @@ export function createColumn(
       column.push(fileExplorerItem);
     }
 
-    await sleep(1000);
-
     const sortedColumn = sortColumnByFolderFirst(column);
     return sortedColumn;
   };
