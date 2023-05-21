@@ -5,7 +5,7 @@ ButtonWrapper.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-function ButtonWrapper({ children }) {
+function ButtonWrapper({ children }): JSX.Element {
   return (
     <div
       style={{

@@ -1,15 +1,15 @@
+import { useAppDispatch } from "@renderer/store/hooks";
 import PropTypes from "prop-types";
 import React from "react";
-import { useDispatch } from "react-redux";
 import ColumnWrapper from "./ColumnWrapper";
-import { navigateTo } from "./store/slices/itemsSlice";
+import { navigateTo } from "@renderer/store/slices/itemsSlice";
 
 ColumnEmptyFolder.propTypes = {
   columnIndex: PropTypes.number.isRequired
 };
 
-function ColumnEmptyFolder({ columnIndex }) {
-  const dispatch = useDispatch();
+function ColumnEmptyFolder({ columnIndex }): JSX.Element {
+  const dispatch = useAppDispatch();
 
   function columnEmptyFolderRef_fn(refElement) {
     if (refElement === null) {

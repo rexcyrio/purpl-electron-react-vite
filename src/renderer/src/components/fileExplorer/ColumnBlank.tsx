@@ -1,6 +1,6 @@
 import React from "react";
 
-function ColumnBlank() {
+function ColumnBlank(): JSX.Element {
   return (
     <div
       style={{

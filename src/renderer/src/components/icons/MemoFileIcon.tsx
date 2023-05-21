@@ -19,11 +19,13 @@ import {
 
 MemoFileIcon.propTypes = {
   isActive: PropTypes.bool.isRequired,
-  fileExtension: PropTypes.string.isRequired,
+  // fileExtension: PropTypes.string.isRequired,
   size: PropTypes.oneOf(["small", "large"]).isRequired
 };
 
-function MemoFileIcon({ isActive, fileExtension, size }): JSX.Element {
+function MemoFileIcon({ isActive, size }): JSX.Element {
+  return <FaFileArchive />;
+
   const style = {
     height: size === "small" ? "1.25rem" : "5rem",
     width: size === "small" ? "1.25rem" : "5rem",

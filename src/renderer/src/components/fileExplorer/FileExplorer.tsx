@@ -1,14 +1,20 @@
 import React, { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import DivWrapper from "./DivWrapper";
 import SideScroller from "./SideScroller";
-import { downArrow, leftArrow, rightArrow, upArrow } from "./store/slices/itemsSlice";
-import { toggleQuickLook } from "./store/slices/quickLookSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  downArrow,
+  leftArrow,
+  rightArrow,
+  upArrow
+} from "../../store/slices/fileExplorerItemsSlice";
+import { fillArray } from "../../utilities/fillArray";
+import { openOrCloseQuickLook } from "@renderer/store/slices/quickLookSlice";
 
-function MainContent() {
-  const mainContentRef = useRef(null);
-  const dispatch = useDispatch();
-  const numColumns = useSelector((state) => state.items.allItems.length);
+function FileExplorer(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const fileExplorerRef = useRef(null);
+  const numColumns = useAppSelector((state) => state.fileExplorerItems.columns.length);
 
   useEffect(() => {
     document.addEventListener("keydown", (event) => {
@@ -39,7 +45,7 @@ function MainContent() {
           }
 
           event.preventDefault();
-          dispatch(toggleQuickLook());
+          dispatch(openOrCloseQuickLook());
           break;
 
         default:
@@ -50,37 +56,28 @@ function MainContent() {
 
   return (
     <div
-      className="main-content"
+      className="file-explorer"
       style={{
         position: "relative"
       }}
     >
       <div
-        ref={mainContentRef}
+        ref={fileExplorerRef}
         style={{
           overflowX: "scroll",
+          overflowY: "hidden",
           display: "flex"
         }}
       >
-        {generateArray(0, numColumns).map((_, columnIndex) => (
+        {fillArray(0, numColumns).map((_, columnIndex) => (
           <DivWrapper key={columnIndex} columnIndex={columnIndex} />
         ))}
       </div>
 
-      <SideScroller mainContentRef={mainContentRef} side="left" />
-      <SideScroller mainContentRef={mainContentRef} side="right" />
+      <SideScroller fileExplorerRef={fileExplorerRef} side="left" />
+      <SideScroller fileExplorerRef={fileExplorerRef} side="right" />
     </div>
   );
 }
 
-function generateArray(value, count) {
-  const arr = [];
-
-  for (let i = 0; i < count; i++) {
-    arr.push(value);
-  }
-
-  return arr;
-}
-
-export default React.memo(MainContent);
+export default React.memo(FileExplorer);

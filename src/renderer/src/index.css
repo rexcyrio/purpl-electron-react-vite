@@ -23,7 +23,7 @@ code {
   display: grid;
   grid-template:
     "top-bar top-bar"
-    "side-bar main-content";
+    "side-bar file-explorer";
   grid-template-rows:
     var(--top-bar-height)
     calc(100vh - var(--top-bar-height));
@@ -42,8 +42,8 @@ code {
   background-color: lightgoldenrodyellow;
 }
 
-.main-content {
-  grid-area: main-content;
+.file-explorer {
+  grid-area: file-explorer;
   background-color: white;
 }
 

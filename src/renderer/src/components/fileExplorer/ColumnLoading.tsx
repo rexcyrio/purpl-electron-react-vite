@@ -1,7 +1,7 @@
 import React from "react";
-import MemoCircularProgress from "./icons/MemoCircularProgress";
+import MemoCircularProgress from "../icons/MemoCircularProgress";
 
-function ColumnLoading() {
+function ColumnLoading(): JSX.Element {
   return (
     <div
       style={{

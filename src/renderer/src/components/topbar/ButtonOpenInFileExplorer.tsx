@@ -1,13 +1,13 @@
 import LaunchIcon from "@mui/icons-material/Launch";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import { useAppDispatch } from "@renderer/store/hooks";
+import { apiGetFSStats } from "@renderer/utilities/api";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import ButtonWrapper from "./ButtonWrapper";
-import { openFileExplorer } from "./store/slices/itemsSlice";
 
-function ButtonOpenInFileExplorer() {
-  const dispatch = useDispatch();
+function ButtonOpenInFileExplorer(): JSX.Element {
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     document.addEventListener("keydown", (event) => {
@@ -18,7 +18,7 @@ function ButtonOpenInFileExplorer() {
           }
 
           event.preventDefault();
-          dispatch(openFileExplorer());
+          // dispatch(openFileExplorer());
           break;
 
         default:
@@ -27,9 +27,10 @@ function ButtonOpenInFileExplorer() {
     });
   }, [dispatch]);
 
-  function handleClick(event) {
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
-    dispatch(openFileExplorer());
+    apiGetFSStats("C:\\Users\\Stefan Lee\\Downloads\\SAF100.pdf").then(console.log);
+    // dispatch(openFileExplorer());
   }
 
   return (

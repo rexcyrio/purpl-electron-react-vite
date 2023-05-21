@@ -10,7 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
-function ButtonHelpWindow() {
+function ButtonHelpWindow(): JSX.Element {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -31,11 +31,11 @@ function ButtonHelpWindow() {
     });
   }, [dialogOpen]);
 
-  function handleDialogOpen() {
+  function handleDialogOpen(): void {
     setDialogOpen(true);
   }
 
-  function handleDialogClose() {
+  function handleDialogClose(): void {
     setDialogOpen(false);
   }
 

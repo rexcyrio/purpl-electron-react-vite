@@ -1,14 +1,17 @@
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import ErrorSnackbar from "./ErrorSnackbar";
-import MainContent from "./MainContent";
-import Sidebar from "./Sidebar";
-import { initReduxStore } from "./store/slices/itemsSlice";
-import Topbar from "./Topbar";
+import FileExplorer from "./components/fileExplorer/FileExplorer";
+import Sidebar from "./components/sidebar/Sidebar";
+import Topbar from "./components/topbar/Topbar";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { initReduxStore } from "./store/slices/fileExplorerItemsSlice";
+import { apiQuitApp } from "./utilities/api";
 
-function App() {
-  const dispatch = useDispatch();
-  const isReady = useSelector((state) => state.isReady);
+function App(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const isReady = useAppSelector((state) => state.isReady);
 
   useEffect(() => {
     dispatch(initReduxStore());
@@ -23,46 +26,34 @@ function App() {
           }
 
           event.preventDefault();
-          window.api.send("QUIT");
+          apiQuitApp();
           break;
 
         default:
           break;
       }
     });
-  }, [dispatch]);
+  }, []);
 
   return (
-    isReady && (
-      <>
-        <div className="grid-container">
-          <Topbar />
-          <Sidebar />
-          <MainContent />
-        </div>
+    <>
+      {isReady ? (
+        <>
+          <div className="grid-container">
+            <Topbar />
+            <Sidebar />
+            <FileExplorer />
+          </div>
 
-        <ErrorSnackbar />
-      </>
-    )
+          <ErrorSnackbar />
+        </>
+      ) : (
+        <Backdrop open={true}>
+          <CircularProgress />
+        </Backdrop>
+      )}
+    </>
   );
-}
-
-export function stopPropagationToDocument(event) {
-  switch (event.key) {
-    case "ArrowUp":
-    case "ArrowDown":
-    case "ArrowLeft":
-    case "ArrowRight":
-    case "e":
-    case "q":
-    case "?":
-    case " ":
-      event.stopPropagation();
-      break;
-
-    default:
-      break;
-  }
 }
 
 export default React.memo(App);

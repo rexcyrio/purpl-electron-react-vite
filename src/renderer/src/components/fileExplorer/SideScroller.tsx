@@ -1,22 +1,22 @@
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { useAppSelector } from "@renderer/store/hooks";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
 import { useDrop } from "react-dnd";
-import { useSelector } from "react-redux";
 
 SideScroller.propTypes = {
-  mainContentRef: PropTypes.exact({
+  fileExplorerRef: PropTypes.exact({
     current: PropTypes.instanceOf(Element)
   }),
   side: PropTypes.oneOf(["left", "right"]).isRequired
 };
 
-function SideScroller({ mainContentRef, side }) {
+function SideScroller({ fileExplorerRef, side }): JSX.Element {
   const requestAnimationFrame_isRunning = useRef(false);
   const requestAnimationFrame_id = useRef(0);
   const startTime = useRef(null);
-  const isDragging = useSelector((state) => state.isDragging);
+  const isDragging = useAppSelector((state) => state.isDragging);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "virtualisedRow",
@@ -44,9 +44,9 @@ function SideScroller({ mainContentRef, side }) {
       const elapsedTime = timestamp - startTime.current;
 
       if (side === "left") {
-        mainContentRef.current.scrollLeft -= getScrollAmount(elapsedTime);
+        fileExplorerRef.current.scrollLeft -= getScrollAmount(elapsedTime);
       } else {
-        mainContentRef.current.scrollLeft += getScrollAmount(elapsedTime);
+        fileExplorerRef.current.scrollLeft += getScrollAmount(elapsedTime);
       }
 
       tick();
