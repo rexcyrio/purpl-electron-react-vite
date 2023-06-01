@@ -1,14 +1,10 @@
+import fswin from "fswin";
+import { apiGetListOfDrives } from "./api";
 import { AssertionError } from "./assertion";
 import { isUpperCase } from "./isUpperCase";
 
-type DriveType = "NO_ROOT_DIR" | "REMOVABLE" | "FIXED" | "REMOTE" | "CDROM" | "RAMDISK" | "UNKNOWN";
-
-interface LogicalDriveList {
-  [key: string]: DriveType;
-}
-
-export async function getListOfDrives(): Promise<LogicalDriveList> {
-  const drives = await window.api.invoke("GET_LIST_OF_DRIVES", null);
+export async function getListOfDrives(): Promise<fswin.LogicalDriveList> {
+  const drives = await apiGetListOfDrives();
   const driveLetters = Object.keys(drives);
 
   for (const driveLetter of driveLetters) {

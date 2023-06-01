@@ -105,17 +105,13 @@ app.on("window-all-closed", () => {
 
 const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
 
-ipcMain.on("GET_NODEJS_DIRNAME", (event, arg) => {
-  event.returnValue = __dirname;
+ipcMain.on("QUIT", (event, arg) => {
+  app.quit();
 });
 
 ipcMain.on("OPEN_FILE_EXPLORER", (event, arg) => {
   const fullPath = arg;
   cmd.exec(`explorer.exe "${fullPath}"`);
-});
-
-ipcMain.on("QUIT", (event, arg) => {
-  app.quit();
 });
 
 ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
@@ -161,20 +157,10 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
   cmd.exec(`"${user_quickLookExePath}" "${arg}"`);
 });
 
-ipcMain.handle("IS_FOLDER", async (event, arg) => {
-  try {
-    const fullPath = arg;
-    const stats = await fs.promises.stat(fullPath);
-    return stats.isDirectory();
-  } catch (error: any) {
-    if (error.code === "EPERM" || error.code === "EBUSY" || error.code === "EACCES") {
-      // exclude this item
-      return undefined;
-    } else {
-      // uncaught error
-      throw error;
-    }
-  }
+ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
+  // TODO: check settings
+  // return __dirname;
+  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
 });
 
 ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
@@ -186,27 +172,6 @@ ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
       resolve(files);
     });
   });
-
-  // try {
-  //   const folderPath = arg;
-  //   const directoryContents = await fs.promises.readdir(folderPath);
-  //   return directoryContents;
-  // } catch (error: any) {
-  //   if (error.code === "EPERM" || error.code === "EBUSY" || error.code === "EACCES") {
-  //     // exclude this item
-  //     return undefined;
-  //   } else {
-  //     // uncaught error
-  //     throw error;
-  //   }
-  // }
-});
-
-ipcMain.handle("GET_FS_STATS", async (event, arg) => {
-  const fullPath = arg;
-  const stats = await fs.promises.stat(fullPath);
-  return stats;
-  // TODO: use fswin
 });
 
 ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
@@ -217,16 +182,14 @@ ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
   });
 });
 
-ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
-  // TODO: check settings
-  // return __dirname;
-  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
-});
-
 ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
   const folderPath = arg;
   await fs.promises.mkdir(folderPath);
 });
+
+// ============================================================================
+// unused
+// ============================================================================
 
 ipcMain.handle("MOVE_ITEM", async (event, arg) => {
   const { from_fullPath, to_fullPath } = arg;

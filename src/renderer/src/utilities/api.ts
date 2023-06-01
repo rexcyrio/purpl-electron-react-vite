@@ -1,4 +1,3 @@
-import fs from "fs";
 import fswin from "fswin";
 import { assertIsValidFullPath } from "./assertIsValidFullPath";
 
@@ -25,9 +24,8 @@ export async function apiGetFsWinDirectoryContents(folderPath: string): Promise<
   return await window.api.invoke("GET_FS_WIN_DIRECTORY_CONTENTS", folderPath);
 }
 
-export async function apiGetFSStats(fullPath: string): Promise<fs.Stats> {
-  assertIsValidFullPath(fullPath);
-  return await window.api.invoke("GET_FS_STATS", fullPath);
+export async function apiGetListOfDrives(): Promise<fswin.LogicalDriveList> {
+  return await window.api.invoke("GET_LIST_OF_DRIVES", null);
 }
 
 export async function apiCreateNewFolder(folderPath: string): Promise<void> {
