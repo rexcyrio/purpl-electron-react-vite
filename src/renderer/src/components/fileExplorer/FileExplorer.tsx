@@ -9,7 +9,7 @@ import {
   upArrow
 } from "../../store/slices/fileExplorerItemsSlice";
 import { fillArray } from "../../utilities/fillArray";
-import { openOrCloseQuickLook } from "@renderer/store/slices/quickLookSlice";
+import { toggleQuickLook } from "@renderer/store/slices/quickLookSlice";
 
 function FileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
@@ -45,7 +45,7 @@ function FileExplorer(): JSX.Element {
           }
 
           event.preventDefault();
-          dispatch(openOrCloseQuickLook());
+          dispatch(toggleQuickLook());
           break;
 
         default:
