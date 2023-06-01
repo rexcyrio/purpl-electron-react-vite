@@ -21,7 +21,7 @@ function SidebarRow({ fullPath }): JSX.Element {
   useEffect(() => {
     const _displayName = getDisplayName(fullPath);
     setDisplayName(_displayName);
-  }, []);
+  }, [fullPath]);
 
   return (
     <div
