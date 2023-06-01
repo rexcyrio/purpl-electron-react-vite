@@ -34,7 +34,7 @@ import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderF
 import { RootState } from "../store";
 import { setIsReady } from "./isReadySlice";
 
-interface FileExplorerItemsState {
+export interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
   indices: number[];
 }

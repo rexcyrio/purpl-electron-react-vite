@@ -7,7 +7,7 @@ import {
 } from "@renderer/utilities/getActiveFileExplorerItem";
 import { RootState } from "../store";
 
-interface QuickLookState {
+export interface QuickLookState {
   isOpen: boolean;
   fullPath: string;
 }
