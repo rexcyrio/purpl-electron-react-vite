@@ -1,12 +1,18 @@
-import { RootState } from "@renderer/store";
 import { FileExplorerItem } from "./FileExplorerItem";
-import { getFileExplorerItemIfAny } from "./getFileExplorerItem";
+import { AssertionError, assertTrue } from "./assertion";
+import { ALL_SPECIAL_FILE_EXPLORER_ITEMS } from "./common";
 
 export function isFirstFileExplorerItemInColumnEqualTo(
-  state: RootState,
-  columnIndex: number,
+  column: FileExplorerItem[],
   SPECIAL_ITEM: FileExplorerItem
 ): boolean {
-  const fileExplorerItem = getFileExplorerItemIfAny(state, columnIndex, 0);
-  return fileExplorerItem === SPECIAL_ITEM;
+  assertTrue(() => ALL_SPECIAL_FILE_EXPLORER_ITEMS.indexOf(SPECIAL_ITEM) > -1);
+
+  const firstFileExplorerItem = column.at(0);
+
+  if (firstFileExplorerItem === undefined) {
+    throw new AssertionError();
+  }
+
+  return firstFileExplorerItem === SPECIAL_ITEM;
 }

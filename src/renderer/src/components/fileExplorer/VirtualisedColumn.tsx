@@ -16,6 +16,7 @@ import ColumnEmptyFolder from "./ColumnEmptyFolder";
 import ColumnFileInfo from "./ColumnFileInfo";
 import ColumnLoading from "./ColumnLoading";
 import VirtualisedRow from "./VirtualisedRow";
+import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
 
 const rem = 16;
 const VIRTUALISED_ROW_PADDING = 5;
@@ -66,11 +67,13 @@ function VirtualisedColumn({ columnIndex }): JSX.Element {
 
   if (column.length === 0) {
     return <ColumnEmptyFolder columnIndex={columnIndex} />;
-  } else if (column[0] === SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS) {
+  } else if (
+    isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS)
+  ) {
     return <ColumnFileInfo />;
-  } else if (column[0] === SPECIAL_FILE_EXPLORER_ITEM_BLANK) {
-    return <ColumnBlank />;
-  } else if (column[0] === SPECIAL_FILE_EXPLORER_ITEM_LOADING) {
+  } else if (isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_BLANK)) {
+    return <ColumnBlank columnIndex={columnIndex} />;
+  } else if (isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_LOADING)) {
     return <ColumnLoading />;
   } else {
     return (

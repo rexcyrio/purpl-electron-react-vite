@@ -11,6 +11,7 @@ import {
 } from "@renderer/utilities/api";
 import { AssertionError, assertTrue } from "@renderer/utilities/assertion";
 import {
+  ALL_SPECIAL_FILE_EXPLORER_ITEMS,
   SPECIAL_FILE_EXPLORER_ITEM_BLANK,
   SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS,
   SPECIAL_FILE_EXPLORER_ITEM_LOADING,
@@ -23,21 +24,24 @@ import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/uti
 import { getDisplayName } from "@renderer/utilities/getDisplayName";
 import { getIncrementalFullPaths } from "@renderer/utilities/getIncrementalFullPaths";
 import { getLastColumn } from "@renderer/utilities/getLastColumn";
-import { getLastColumnIndex } from "@renderer/utilities/getLastColumnIndex";
 import { getListOfDrives } from "@renderer/utilities/getListOfDrives";
 import { getPathComponents } from "@renderer/utilities/getPathComponents";
+import { getPreviewColumn } from "@renderer/utilities/getPreviewColumn";
 import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
 import { removeTrailingPathSeparatorIfNeeded } from "@renderer/utilities/removeTrailingPathSeparatorIfNeeded";
 import { replaceBasename } from "@renderer/utilities/replaceBasename";
-import { sleep } from "@renderer/utilities/sleep";
 import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderFirst";
 import { RootState } from "../store";
 import { setIsReady } from "./isReadySlice";
-import { getPreviewColumn } from "@renderer/utilities/getPreviewColumn";
 
-export interface FileExplorerItemsState {
+interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
   indices: number[];
+}
+
+interface PairOfColumnAndColumnIndex {
+  column: FileExplorerItem[];
+  columnIndex: number;
 }
 
 const initialState: FileExplorerItemsState = {
@@ -81,13 +85,23 @@ export const fileExplorerItemsSlice = createSlice({
       state.columns.push(column);
       return state;
     },
-    _removeLastColumn: (state) => {
-      state.columns.pop();
+    _replaceColumnWithBlankColumn: (state, action: PayloadAction<number>) => {
+      const columnIndex = action.payload;
+      state.columns[columnIndex] = [SPECIAL_FILE_EXPLORER_ITEM_BLANK];
       return state;
     },
-    _updateLastColumn: (state, action: PayloadAction<FileExplorerItem[]>) => {
-      const newLastColumn = action.payload;
-      state.columns[state.columns.length - 1] = newLastColumn;
+    _replaceAllColumnsToTheRightOfWithBlankColumns: (state, action: PayloadAction<number>) => {
+      const columnIndex = action.payload;
+
+      for (let i = columnIndex + 1; i < state.columns.length; i++) {
+        state.columns[i] = [SPECIAL_FILE_EXPLORER_ITEM_BLANK];
+      }
+
+      return state;
+    },
+    _replaceBlankColumnWithColumn: (state, action: PayloadAction<PairOfColumnAndColumnIndex>) => {
+      const { column, columnIndex } = action.payload;
+      state.columns[columnIndex] = column;
       return state;
     },
     _updatePreviewColumn: (state, action: PayloadAction<FileExplorerItem[]>) => {
@@ -95,7 +109,12 @@ export const fileExplorerItemsSlice = createSlice({
       state.columns[state.indices.length] = newPreviewColumn;
       return state;
     },
-    _removeColumnsToTheRightOf: (state, action: PayloadAction<number>) => {
+
+    // ========================================================================
+    // public reducers
+    // ========================================================================
+
+    removeColumnsToTheRightOf: (state, action: PayloadAction<number>) => {
       const columnIndex = action.payload;
       state.columns = state.columns.slice(0, columnIndex + 1);
       return state;
@@ -111,11 +130,13 @@ const {
   _updateLastIndex,
   _removeIndicesToTheRightOf,
   _addColumn,
-  _removeLastColumn,
-  _updateLastColumn,
-  _updatePreviewColumn,
-  _removeColumnsToTheRightOf
+  _replaceColumnWithBlankColumn,
+  _replaceAllColumnsToTheRightOfWithBlankColumns,
+  _replaceBlankColumnWithColumn,
+  _updatePreviewColumn
 } = fileExplorerItemsSlice.actions;
+
+export const { removeColumnsToTheRightOf } = fileExplorerItemsSlice.actions;
 
 export function initReduxStore(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
@@ -203,35 +224,36 @@ export function downArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyA
 
 export function leftArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
+    const state = getState();
+
+    if (state.fileExplorerItems.indices.length === 1) {
+      return;
+    }
+
     dispatch(_removeLastIndex());
-    dispatch(_removeLastColumn());
+    dispatch(replaceLastNonBlankColumnWithBlankColumn());
   };
 }
 
 export function rightArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const lastColumnIndex = getLastColumnIndex(state);
+    const [activeColumnIndex, activeRowIndex] =
+      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
 
-    const isNextColumnBlank = isFirstFileExplorerItemInColumnEqualTo(
-      state,
-      lastColumnIndex,
-      SPECIAL_FILE_EXPLORER_ITEM_BLANK
-    );
+    const nextColumn = getColumn(state, activeColumnIndex + 1);
 
-    const isNextColumnLoading = isFirstFileExplorerItemInColumnEqualTo(
-      state,
-      lastColumnIndex,
-      SPECIAL_FILE_EXPLORER_ITEM_LOADING
-    );
+    // TODO: empty column
+    if (nextColumn.length === 0) {
+      dispatch(_addIndex(-1));
+      return;
+    }
 
-    const isNextColumnFileDetails = isFirstFileExplorerItemInColumnEqualTo(
-      state,
-      lastColumnIndex,
-      SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS
-    );
+    const isNextColumnSpecial = ALL_SPECIAL_FILE_EXPLORER_ITEMS.map((each) =>
+      isFirstFileExplorerItemInColumnEqualTo(nextColumn, each)
+    ).some(Boolean);
 
-    if (isNextColumnBlank || isNextColumnLoading || isNextColumnFileDetails) {
+    if (isNextColumnSpecial) {
       return;
     }
 
@@ -297,7 +319,7 @@ export function createLoadingColumn(): ThunkAction<
 export function addPreviewColumn(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const loadingColumn = dispatch(createLoadingColumn());
-    dispatch(_addColumn(loadingColumn));
+    dispatch(replaceNextBlankColumnWithElseAddNewColumn(loadingColumn));
 
     const newPreviewColumn = await dispatch(createPreviewColumn());
 
@@ -328,6 +350,57 @@ export function updatePreviewColumn(): ThunkAction<Promise<void>, RootState, unk
   };
 }
 
+export function replaceNextBlankColumnWithElseAddNewColumn(
+  newColumn: FileExplorerItem[]
+): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
+  return async function thunk(dispatch, getState): Promise<void> {
+    const state = getState();
+    const columns = state.fileExplorerItems.columns;
+
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns[i];
+
+      if (isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_BLANK)) {
+        const payload: PairOfColumnAndColumnIndex = {
+          column: newColumn,
+          columnIndex: i
+        };
+
+        dispatch(_replaceBlankColumnWithColumn(payload));
+        return;
+      }
+    }
+
+    // add a new column normally
+    dispatch(_addColumn(newColumn));
+  };
+}
+
+export function replaceLastNonBlankColumnWithBlankColumn(): ThunkAction<
+  Promise<void>,
+  RootState,
+  unknown,
+  AnyAction
+> {
+  return async function thunk(dispatch, getState): Promise<void> {
+    const state = getState();
+    const columns = state.fileExplorerItems.columns;
+
+    // reverse for loop
+    for (let i = columns.length - 1; i >= 0; i--) {
+      const column = columns[i];
+
+      if (!isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_BLANK)) {
+        dispatch(_replaceColumnWithBlankColumn(i));
+        return;
+      }
+    }
+
+    // should never reach here
+    throw new AssertionError();
+  };
+}
+
 export function navigateTo(
   columnIndex: number,
   rowIndex: number
@@ -349,10 +422,10 @@ export function navigateTo(
         // user clicked on an already selected parent item
         // => make it the active item
         dispatch(_removeIndicesToTheRightOf(columnIndex));
-        dispatch(_removeColumnsToTheRightOf(columnIndex + 1));
+        dispatch(_replaceAllColumnsToTheRightOfWithBlankColumns(columnIndex + 1));
       } else {
         dispatch(_removeIndicesToTheRightOf(columnIndex));
-        dispatch(_removeColumnsToTheRightOf(columnIndex));
+        dispatch(_replaceAllColumnsToTheRightOfWithBlankColumns(columnIndex));
         dispatch(_updateLastIndex(rowIndex));
         dispatch(updatePreviewColumn());
       }
@@ -394,7 +467,7 @@ export function navigateToFullPath(
     }
 
     dispatch(_removeIndicesToTheRightOf(indexOfFirstDifferentPathComponent - 1));
-    dispatch(_removeColumnsToTheRightOf(indexOfFirstDifferentPathComponent));
+    dispatch(_replaceAllColumnsToTheRightOfWithBlankColumns(indexOfFirstDifferentPathComponent));
 
     // adding the remaining columns
     const incrementalFullPaths = getIncrementalFullPaths(fullPath);

@@ -1,23 +1,15 @@
+import { useAppSelector } from "@renderer/store/hooks";
+import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
 import VirtualisedColumn from "./VirtualisedColumn";
-import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
-import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
-import { SPECIAL_FILE_EXPLORER_ITEM_BLANK } from "@renderer/utilities/common";
-import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
-import { removeColumnsToTheRightOf } from "@renderer/store/slices/itemsSlice";
 
 DivWrapper.propTypes = {
   columnIndex: PropTypes.number.isRequired
 };
 
 function DivWrapper({ columnIndex }): JSX.Element {
-  const dispatch = useAppDispatch();
   const divWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  const isBlankColumn = useAppSelector((state) =>
-    isFirstFileExplorerItemInColumnEqualTo(state, columnIndex, SPECIAL_FILE_EXPLORER_ITEM_BLANK)
-  );
 
   const [isActiveColumn, isPreviewColumn] = useAppSelector((state) => {
     const [activeColumnIndex, activeRowIndex] =
@@ -77,21 +69,6 @@ function DivWrapper({ columnIndex }): JSX.Element {
   //   }),
   //   [columnIndex, dispatch, items]
   // );
-
-  useEffect(() => {
-    if (divWrapperRef.current === null) {
-      return;
-    }
-
-    if (isBlankColumn) {
-      const rect = divWrapperRef.current.getBoundingClientRect();
-      const windowInnerWidth = window.innerWidth;
-
-      if (rect.left > windowInnerWidth) {
-        dispatch(removeColumnsToTheRightOf(columnIndex));
-      }
-    }
-  }, [isBlankColumn, dispatch, columnIndex]);
 
   useEffect(() => {
     if (divWrapperRef.current === null) {
