@@ -11,21 +11,23 @@ function Sidebar(): JSX.Element {
         overflowY: "scroll"
       }}
     >
-      <SidebarSection headerName="Favourites">
-        <SidebarRow fullPath="C:\Users\Stefan Lee" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Desktop" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Downloads" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Documents" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Music" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Pictures" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\Videos" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\abc" />
-        <SidebarRow fullPath="C:\Users\Stefan Lee\one two three four five six seven eight nine ten" />
-      </SidebarSection>
+      <div style={{ margin: "0.75rem 0" }}>
+        <SidebarSection headerName="Favourites">
+          <SidebarRow fullPath="C:\Users\Stefan Lee" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Desktop" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Downloads" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Documents" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Music" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Pictures" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Videos" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\abc" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\one two three four five six seven eight nine ten" />
+        </SidebarSection>
 
-      <SidebarSection headerName="Drives">
-        <SidebarRow fullPath="C:\" />
-      </SidebarSection>
+        <SidebarSection headerName="Drives">
+          <SidebarRow fullPath="C:\" />
+        </SidebarSection>
+      </div>
     </div>
   );
 }
