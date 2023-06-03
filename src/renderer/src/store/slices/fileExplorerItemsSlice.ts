@@ -455,8 +455,13 @@ export function navigateTo(
         dispatch(updatePreviewColumn());
       }
     } else if (columnIndex === activeColumnIndex + 1) {
-      dispatch(_addIndex(rowIndex));
-      dispatch(addPreviewColumn());
+      if (rowIndex === -1) {
+        // is empty folder
+        dispatch(_addIndex(rowIndex));
+      } else {
+        dispatch(_addIndex(rowIndex));
+        dispatch(addPreviewColumn());
+      }
     } else {
       throw new AssertionError();
     }
