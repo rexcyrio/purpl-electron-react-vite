@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
 import { navigateTo } from "@renderer/store/slices/fileExplorerItemsSlice";
 import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
-import { getSelectedFileExplorerItemInColumnElseNull } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
+import { getSelectedFileExplorerItemInColumnIfAny } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useRef } from "react";
 import MemoArrowRight from "../icons/MemoArrowRight";
@@ -21,7 +21,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
   const self = useAppSelector((state) => getFileExplorerItem(state, columnIndex, rowIndex));
 
   const isSelected = useAppSelector(
-    (state) => self === getSelectedFileExplorerItemInColumnElseNull(state, columnIndex)
+    (state) => self === getSelectedFileExplorerItemInColumnIfAny(state, columnIndex)
   );
 
   const isActive = useAppSelector((state) => self === getActiveFileExplorerItemIfAny(state));

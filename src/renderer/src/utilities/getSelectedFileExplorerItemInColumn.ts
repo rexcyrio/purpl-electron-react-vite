@@ -11,7 +11,7 @@ export function getSelectedFileExplorerItemInColumn(
   return getFileExplorerItem(state, columnIndex, rowIndex);
 }
 
-export function getSelectedFileExplorerItemInColumnElseNull(
+export function getSelectedFileExplorerItemInColumnIfAny(
   state: RootState,
   columnIndex: number
 ): FileExplorerItem | null {
