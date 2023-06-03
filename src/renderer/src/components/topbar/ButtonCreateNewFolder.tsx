@@ -66,12 +66,11 @@ function ButtonCreateNewFolder(): JSX.Element {
 
     const _isValid = await isValid(newFolderName);
 
-    if (!_isValid) {
+    if (_isValid) {
+      dispatch(createNewFolder(newFolderName));
+    } else {
       setIsDisabled(false);
-      return;
     }
-
-    dispatch(createNewFolder(newFolderName));
   }, [dispatch, isValid, newFolderName]);
 
   const handleDialogOpen = useCallback(() => {
