@@ -11,12 +11,20 @@ import {
 import { fillArray } from "../../utilities/fillArray";
 import { toggleQuickLook } from "@renderer/store/slices/quickLookSlice";
 
+let didInit = false;
+
 function FileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
   const fileExplorerRef = useRef(null);
   const numColumns = useAppSelector((state) => state.fileExplorerItems.columns.length);
 
   useEffect(() => {
+    if (didInit) {
+      return;
+    }
+
+    didInit = true;
+
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "ArrowUp":

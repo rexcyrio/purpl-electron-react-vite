@@ -9,15 +9,21 @@ import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { initReduxStore } from "./store/slices/fileExplorerItemsSlice";
 import { apiQuitApp } from "./utilities/api";
 
+let didInit = false;
+
 function App(): JSX.Element {
   const dispatch = useAppDispatch();
   const isReady = useAppSelector((state) => state.isReady);
 
   useEffect(() => {
-    dispatch(initReduxStore());
-  }, [dispatch]);
+    if (didInit) {
+      return;
+    }
 
-  useEffect(() => {
+    didInit = true;
+
+    dispatch(initReduxStore());
+
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "q":
@@ -33,7 +39,7 @@ function App(): JSX.Element {
           break;
       }
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <>

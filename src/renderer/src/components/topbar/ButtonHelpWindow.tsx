@@ -10,10 +10,18 @@ import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
+let didInit = false;
+
 function ButtonHelpWindow(): JSX.Element {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
+    if (didInit) {
+      return;
+    }
+
+    didInit = true;
+
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "?":

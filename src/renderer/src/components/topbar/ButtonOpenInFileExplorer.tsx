@@ -5,10 +5,18 @@ import { useAppDispatch } from "@renderer/store/hooks";
 import React, { useEffect } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
+let didInit = false;
+
 function ButtonOpenInFileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    if (didInit) {
+      return;
+    }
+
+    didInit = true;
+
     document.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "e":
