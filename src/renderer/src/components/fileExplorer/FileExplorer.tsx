@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import DivWrapper from "./DivWrapper";
+import ScrollableColumnDivWrapper from "./ScrollableColumnDivWrapper";
 import SideScroller from "./SideScroller";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -68,7 +68,7 @@ function FileExplorer(): JSX.Element {
         }}
       >
         {fillArray(0, numColumns).map((_, columnIndex) => (
-          <DivWrapper key={columnIndex} columnIndex={columnIndex} />
+          <ScrollableColumnDivWrapper key={columnIndex} columnIndex={columnIndex} />
         ))}
       </div>
 

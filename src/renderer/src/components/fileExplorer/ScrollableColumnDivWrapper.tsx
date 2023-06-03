@@ -5,11 +5,11 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
 import VirtualisedColumn from "./VirtualisedColumn";
 
-DivWrapper.propTypes = {
+ScrollableColumnDivWrapper.propTypes = {
   columnIndex: PropTypes.number.isRequired
 };
 
-function DivWrapper({ columnIndex }): JSX.Element {
+function ScrollableColumnDivWrapper({ columnIndex }): JSX.Element {
   const divWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [isActiveColumn, isPreviewColumn] = useAppSelector((state) => {
@@ -138,4 +138,4 @@ function DivWrapper({ columnIndex }): JSX.Element {
   );
 }
 
-export default React.memo(DivWrapper);
+export default React.memo(ScrollableColumnDivWrapper);
