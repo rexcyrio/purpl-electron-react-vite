@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
 import { navigateTo } from "@renderer/store/slices/fileExplorerItemsSlice";
-import { getActiveFileExplorerItem } from "@renderer/utilities/getActiveFileExplorerItem";
+import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
 import { getSelectedFileExplorerItemInColumnElseNull } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
 import PropTypes from "prop-types";
@@ -24,7 +24,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
     (state) => self === getSelectedFileExplorerItemInColumnElseNull(state, columnIndex)
   );
 
-  const isActive = useAppSelector((state) => self === getActiveFileExplorerItem(state));
+  const isActive = useAppSelector((state) => self === getActiveFileExplorerItemIfAny(state));
 
   // const [{ isDragging }, drag, dragPreview] = useDrag(
   //   () => ({

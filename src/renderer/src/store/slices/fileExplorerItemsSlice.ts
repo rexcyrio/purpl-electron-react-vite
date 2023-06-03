@@ -198,7 +198,7 @@ export function upArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAct
     const state = getState();
     const [columnIndex, rowIndex] = getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
 
-    if (rowIndex === 0) {
+    if (rowIndex === 0 || rowIndex === -1) {
       return;
     }
 
@@ -213,7 +213,7 @@ export function downArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyA
     const [columnIndex, rowIndex] = getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
     const column = getColumn(state, columnIndex);
 
-    if (rowIndex === column.length - 1) {
+    if (rowIndex === column.length - 1 || rowIndex === -1) {
       return;
     }
 
@@ -230,8 +230,17 @@ export function leftArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyA
       return;
     }
 
-    dispatch(_removeLastIndex());
-    dispatch(replaceLastNonBlankColumnWithBlankColumn());
+    const [activeColumnIndex, activeRowIndex] =
+      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+
+    const column = getColumn(state, activeColumnIndex);
+
+    if (column.length === 0) {
+      dispatch(_removeLastIndex());
+    } else {
+      dispatch(_removeLastIndex());
+      dispatch(replaceLastNonBlankColumnWithBlankColumn());
+    }
   };
 }
 
@@ -241,9 +250,12 @@ export function rightArrow(): ThunkAction<Promise<void>, RootState, unknown, Any
     const [activeColumnIndex, activeRowIndex] =
       getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
 
+    if (activeRowIndex === -1) {
+      return;
+    }
+
     const nextColumn = getColumn(state, activeColumnIndex + 1);
 
-    // TODO: empty column
     if (nextColumn.length === 0) {
       dispatch(_addIndex(-1));
       return;
