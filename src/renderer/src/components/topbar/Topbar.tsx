@@ -3,9 +3,8 @@ import React from "react";
 import ButtonCreateNewFolder from "./ButtonCreateNewFolder";
 import ButtonHelpWindow from "./ButtonHelpWindow";
 import ButtonOpenInFileExplorer from "./ButtonOpenInFileExplorer";
-import ButtonSettings from "./ButtonSettings";
-import ButtonWrapper from "./ButtonWrapper";
 import ButtonQuickLook from "./ButtonQuickLook";
+import ButtonSettings from "./ButtonSettings";
 
 function Topbar(): JSX.Element {
   return (

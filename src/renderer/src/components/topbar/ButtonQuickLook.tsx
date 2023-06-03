@@ -3,10 +3,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
-import {
-  toggleQuickLook,
-  updateQuickLookIfNeeded
-} from "@renderer/store/slices/quickLookSlice";
+import { toggleQuickLook, updateQuickLookIfNeeded } from "@renderer/store/slices/quickLookSlice";
 import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import React, { useCallback, useEffect, useMemo } from "react";
 import ButtonWrapper from "./ButtonWrapper";

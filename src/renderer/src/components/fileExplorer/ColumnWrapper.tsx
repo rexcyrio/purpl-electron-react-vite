@@ -5,7 +5,7 @@ ColumnWrapper.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-function ColumnWrapper({ children }) {
+function ColumnWrapper({ children }): JSX.Element {
   return (
     <div
       style={{

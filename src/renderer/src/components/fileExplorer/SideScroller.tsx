@@ -2,12 +2,11 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useAppSelector } from "@renderer/store/hooks";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef } from "react";
-import { useDrop } from "react-dnd";
+import React, { useRef } from "react";
 
 SideScroller.propTypes = {
   fileExplorerRef: PropTypes.exact({
-    current: PropTypes.instanceOf(Element)
+    current: PropTypes.instanceOf(HTMLDivElement)
   }),
   side: PropTypes.oneOf(["left", "right"]).isRequired
 };
@@ -15,27 +14,27 @@ SideScroller.propTypes = {
 function SideScroller({ fileExplorerRef, side }): JSX.Element {
   const requestAnimationFrame_isRunning = useRef(false);
   const requestAnimationFrame_id = useRef(0);
-  const startTime = useRef(null);
+  const startTime = useRef<number | null>(null);
   const isDragging = useAppSelector((state) => state.isDragging);
 
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: "virtualisedRow",
-    hover: (item, monitor) => {
-      if (!requestAnimationFrame_isRunning.current) {
-        startScrolling();
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver()
-    })
-  }));
+  // const [{ isOver }, drop] = useDrop(() => ({
+  //   accept: "virtualisedRow",
+  //   hover: (item, monitor) => {
+  //     if (!requestAnimationFrame_isRunning.current) {
+  //       startScrolling();
+  //     }
+  //   },
+  //   collect: (monitor) => ({
+  //     isOver: monitor.isOver()
+  //   })
+  // }));
 
-  function startScrolling() {
+  function startScrolling(): void {
     requestAnimationFrame_isRunning.current = true;
     tick();
   }
 
-  function tick() {
+  function tick(): void {
     requestAnimationFrame_id.current = window.requestAnimationFrame((timestamp) => {
       if (startTime.current === null) {
         startTime.current = timestamp;
@@ -53,7 +52,7 @@ function SideScroller({ fileExplorerRef, side }): JSX.Element {
     });
   }
 
-  function stopScrolling() {
+  function stopScrolling(): void {
     if (requestAnimationFrame_isRunning.current) {
       window.cancelAnimationFrame(requestAnimationFrame_id.current);
     }
@@ -63,43 +62,49 @@ function SideScroller({ fileExplorerRef, side }): JSX.Element {
     startTime.current = null;
   }
 
-  useEffect(() => {
-    if (!isOver) {
-      stopScrolling();
-    }
-  }, [isOver]);
+  // useEffect(() => {
+  //   if (!isOver) {
+  //     stopScrolling();
+  //   }
+  // }, [isOver]);
 
   return (
-    isDragging && (
-      <div
-        ref={drop}
-        style={{
-          height: "32%",
-          width: "3rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "pink",
-          position: "absolute",
-          top: "calc(50% - 16%)",
-          [side]: "0"
-        }}
-      >
-        {side === "left" ? <ArrowBackIosNewIcon /> : <ArrowForwardIosIcon />}
-      </div>
-    )
+    <>
+      {isDragging ? (
+        <div
+          // ref={drop}
+          style={{
+            height: "32%",
+            width: "3rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "pink",
+            position: "absolute",
+            top: "calc(50% - 16%)",
+            [side]: "0"
+          }}
+        >
+          {side === "left" ? <ArrowBackIosNewIcon /> : <ArrowForwardIosIcon />}
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 
-function getScrollAmount(elapsedTime) {
+function getScrollAmount(elapsedTime: number): number {
   const base = 7;
 
   if (elapsedTime < 1500) {
     return base;
   }
+
   if (elapsedTime < 3000) {
     return 2.5 * base;
   }
+
   return 5 * base;
 }
 

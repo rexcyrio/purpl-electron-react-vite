@@ -15,7 +15,7 @@ let didInit = false;
 
 function FileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
-  const fileExplorerRef = useRef(null);
+  const fileExplorerRef = useRef<HTMLDivElement | null>(null);
   const numColumns = useAppSelector((state) => state.fileExplorerItems.columns.length);
 
   useEffect(() => {

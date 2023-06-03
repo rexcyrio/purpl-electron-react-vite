@@ -6,9 +6,7 @@ export const isCreateNewFolderDialogOpenSlice = createSlice({
   name: "isCreateNewFolderDialogOpen",
   initialState,
   reducers: {
-    setIsCreateNewFolderDialogOpen: (state, action: PayloadAction<boolean>) => {
-      return action.payload;
-    }
+    setIsCreateNewFolderDialogOpen: (state, action: PayloadAction<boolean>) => action.payload
   }
 });
 
