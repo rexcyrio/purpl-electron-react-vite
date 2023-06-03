@@ -402,6 +402,11 @@ export function replaceLastNonBlankColumnWithBlankColumn(): ThunkAction<
     for (let i = columns.length - 1; i >= 0; i--) {
       const column = columns[i];
 
+      if (column.length === 0) {
+        dispatch(_replaceColumnWithBlankColumn(i));
+        return;
+      }
+
       if (!isFirstFileExplorerItemInColumnEqualTo(column, SPECIAL_FILE_EXPLORER_ITEM_BLANK)) {
         dispatch(_replaceColumnWithBlankColumn(i));
         return;
