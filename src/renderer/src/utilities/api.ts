@@ -28,6 +28,10 @@ export async function apiGetListOfDrives(): Promise<fswin.LogicalDriveList> {
   return await window.api.invoke("GET_LIST_OF_DRIVES", null);
 }
 
+export async function apiDoesFileExist(fullPath: string): Promise<boolean> {
+  return await window.api.invoke("DOES_FILE_EXIST", fullPath);
+}
+
 export async function apiCreateNewFolder(folderPath: string): Promise<void> {
   assertIsValidFullPath(folderPath);
   await window.api.invoke("CREATE_NEW_FOLDER", folderPath);

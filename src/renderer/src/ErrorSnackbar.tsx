@@ -15,7 +15,15 @@ function ErrorSnackbar(): JSX.Element {
   }, [dispatch]);
 
   return (
-    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+    <Snackbar
+      open={open}
+      autoHideDuration={6000}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right"
+      }}
+    >
       <Alert onClose={handleClose} severity="error" style={{ width: "100%" }}>
         <AlertTitle>Something went wrong!</AlertTitle>
         {alertText}

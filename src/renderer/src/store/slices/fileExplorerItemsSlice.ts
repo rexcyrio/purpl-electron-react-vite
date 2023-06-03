@@ -6,6 +6,7 @@ import {
 } from "@renderer/utilities/FileExplorerItem";
 import {
   apiCreateNewFolder,
+  apiDoesFileExist,
   apiGetFsWinDirectoryContents,
   apiGetStartingDirectory
 } from "@renderer/utilities/api";
@@ -33,6 +34,8 @@ import { replaceBasename } from "@renderer/utilities/replaceBasename";
 import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderFirst";
 import { RootState } from "../store";
 import { setIsReady } from "./isReadySlice";
+import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
+import { openErrorSnackbarWithAlertText } from "./errorSnackbarSlice";
 
 export interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
@@ -472,10 +475,16 @@ export function navigateToFullPath(
   fullPath: string
 ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
+    const doesFileExist = await apiDoesFileExist(fullPath);
+
+    if (!doesFileExist) {
+      dispatch(openErrorSnackbarWithAlertText(`"${fullPath}" does not exist.`));
+      return;
+    }
+
     const targetPathComponents = getPathComponents(fullPath);
 
-    const state = getState();
-    const activeFileExplorerItem = getActiveFileExplorerItem(state);
+    const activeFileExplorerItem = getActiveFileExplorerItem(getState());
     const currentPathComponents = getPathComponents(activeFileExplorerItem.fullPath);
 
     const indexOfFirstDifferentPathComponent = getArrayIndexOfFirstDifferentElement(
@@ -491,23 +500,15 @@ export function navigateToFullPath(
     dispatch(_removeIndicesToTheRightOf(indexOfFirstDifferentPathComponent - 1));
     dispatch(_replaceAllColumnsToTheRightOfWithBlankColumns(indexOfFirstDifferentPathComponent));
 
-    // adding the remaining columns
     const incrementalFullPaths = getIncrementalFullPaths(fullPath);
 
     for (let i = indexOfFirstDifferentPathComponent; i < incrementalFullPaths.length; i++) {
-      const folderPath = incrementalFullPaths[i];
-      const column = await dispatch(createColumn(folderPath));
-      dispatch(_addColumn(column));
-    }
-
-    // adding the remaining indices
-    const columns = getState().fileExplorerItems.columns;
-
-    for (let i = indexOfFirstDifferentPathComponent; i < incrementalFullPaths.length; i++) {
-      const folderPath = incrementalFullPaths[i];
+      // adding the indices
+      const columns = getState().fileExplorerItems.columns;
       const column = columns[i];
-
+      const folderPath = incrementalFullPaths[i];
       const selectedItemDisplayName = getDisplayName(folderPath);
+
       const index = ((): number => {
         for (let j = 0; j < column.length; j++) {
           const fileExplorerItem = column[j];
@@ -523,6 +524,16 @@ export function navigateToFullPath(
       assertTrue(() => index > -1);
 
       dispatch(_addIndex(index));
+
+      // adding the columns
+      const fileExplorerItem = getFileExplorerItem(getState(), i, index);
+
+      const newColumn =
+        fileExplorerItem.type === "file"
+          ? [SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS]
+          : await dispatch(createColumn(folderPath));
+
+      dispatch(replaceNextBlankColumnWithElseAddNewColumn(newColumn));
     }
   };
 }

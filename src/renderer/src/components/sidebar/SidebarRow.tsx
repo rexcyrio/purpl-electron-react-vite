@@ -1,6 +1,8 @@
+import { useAppDispatch } from "@renderer/store/hooks";
+import { navigateToFullPath } from "@renderer/store/slices/fileExplorerItemsSlice";
 import { getDisplayName } from "@renderer/utilities/getDisplayName";
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import SidebarRowIcon from "./SidebarRowIcon";
 
 SidebarRow.propTypes = {
@@ -8,6 +10,7 @@ SidebarRow.propTypes = {
 };
 
 function SidebarRow({ fullPath }): JSX.Element {
+  const dispatch = useAppDispatch();
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const handleMouseEnter = useCallback(() => {
@@ -18,12 +21,17 @@ function SidebarRow({ fullPath }): JSX.Element {
     setIsMouseOver(false);
   }, []);
 
+  const handleClick = useCallback(() => {
+    dispatch(navigateToFullPath(fullPath));
+  }, [dispatch, fullPath]);
+
   const displayName = getDisplayName(fullPath);
 
   return (
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
       title={fullPath}
       style={{
         display: "flex",

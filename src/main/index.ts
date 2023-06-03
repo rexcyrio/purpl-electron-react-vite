@@ -1,13 +1,14 @@
-import fswin from "fswin";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import cmd from "child_process";
 import { BrowserWindow, app, dialog, ipcMain, shell } from "electron";
 import fs from "fs";
+import fswin from "fswin";
 import os from "os";
 import path, { join } from "path";
 import icon from "../../resources/icon.png?asset";
-import { doesFileExist } from "./doesFileExist";
 import { JSONFileWrapper } from "./JSONFileWrapper";
+import { assertTrueAsync } from "./assertion";
+import { doesFileExist } from "./doesFileExist";
 
 const USERPROFILE = os.homedir();
 const WILDCARD = "*";
@@ -165,6 +166,19 @@ ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
 
 ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
   const folderPath = arg;
+
+  await assertTrueAsync(() => {
+    return new Promise((resolve, reject) => {
+      fswin.getAttributes(folderPath, (result) => {
+        if (result?.IS_DIRECTORY) {
+          resolve(true);
+        }
+
+        resolve(false);
+      });
+    });
+  });
+
   const folderPathWithTrailingWildcard = path.win32.join(folderPath, WILDCARD);
 
   return new Promise((resolve, reject) => {
@@ -180,6 +194,11 @@ ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
       resolve(result);
     });
   });
+});
+
+ipcMain.handle("DOES_FILE_EXIST", async (event, arg) => {
+  const fullPath = arg;
+  return await doesFileExist(fullPath);
 });
 
 ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
