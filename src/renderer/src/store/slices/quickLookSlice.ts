@@ -112,6 +112,7 @@ export function updateQuickLookIfNeeded(): ThunkAction<void, RootState, unknown,
       }
 
       const fullPath = activeFileExplorerItem.fullPath;
+      dispatch(_setFullPath(fullPath));
       apiRunQuickLook(fullPath);
     }
   };
