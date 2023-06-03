@@ -1,4 +1,5 @@
 import { useAppSelector } from "@renderer/store/hooks";
+import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
@@ -19,6 +20,8 @@ function DivWrapper({ columnIndex }): JSX.Element {
     const _isPreviewColumn = columnIndex === activeColumnIndex + 1;
     return [_isActiveColumn, _isPreviewColumn];
   });
+
+  const activeFileExplorerItem = useAppSelector((state) => getActiveFileExplorerItemIfAny(state));
 
   // const items = useAppSelector((state) => state.items.allItems[columnIndex]);
 
@@ -81,7 +84,7 @@ function DivWrapper({ columnIndex }): JSX.Element {
         inline: "nearest"
       });
     }
-  }, [isPreviewColumn]);
+  }, [isPreviewColumn, activeFileExplorerItem]);
 
   useEffect(() => {
     if (divWrapperRef.current === null) {
@@ -94,7 +97,7 @@ function DivWrapper({ columnIndex }): JSX.Element {
         inline: "nearest"
       });
     }
-  }, [isActiveColumn]);
+  }, [isActiveColumn, activeFileExplorerItem]);
 
   // function divWrapperRef_fn(refElement) {
   //   divWrapperRef.current = refElement;
