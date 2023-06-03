@@ -65,13 +65,13 @@ function ButtonHelpWindow(): JSX.Element {
             <code>↑ / ↓</code> : select item
           </DialogContentText>
           <DialogContentText>
-            <code>←</code> : navigate to parent folder
+            <code>←</code> : navigate up to parent folder
           </DialogContentText>
           <DialogContentText>
-            <code>→</code> : open into folder (if selected item is a folder)
+            <code>→</code> : navigate into folder (if selected item is a folder)
           </DialogContentText>
           <DialogContentText>
-            <code>e</code> : open Windows File Explorer here
+            <code>e</code> : open Windows File Explorer
           </DialogContentText>
           <DialogContentText>
             <code>q</code> : quit app
@@ -80,7 +80,7 @@ function ButtonHelpWindow(): JSX.Element {
             <code>?</code> : toggle this help window
           </DialogContentText>
           <DialogContentText>
-            <code>Space</code> : toggle QuickLook.exe
+            <code>Space</code> : toggle QuickLook
           </DialogContentText>
         </DialogContent>
 
