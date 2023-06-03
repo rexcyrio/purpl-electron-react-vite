@@ -30,14 +30,14 @@ function ButtonHelpWindow(): JSX.Element {
           }
 
           event.preventDefault();
-          setDialogOpen(!dialogOpen);
+          setDialogOpen((prev) => !prev);
           break;
 
         default:
           break;
       }
     });
-  }, [dialogOpen]);
+  }, []);
 
   function handleDialogOpen(): void {
     setDialogOpen(true);
