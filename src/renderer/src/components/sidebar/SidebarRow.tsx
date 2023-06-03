@@ -8,20 +8,17 @@ SidebarRow.propTypes = {
 };
 
 function SidebarRow({ fullPath }): JSX.Element {
-  const [displayName, setDisplayName] = useState("");
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const handleMouseEnter = useCallback(() => {
     setIsMouseOver(true);
   }, []);
+
   const handleMouseLeave = useCallback(() => {
     setIsMouseOver(false);
   }, []);
 
-  useEffect(() => {
-    const _displayName = getDisplayName(fullPath);
-    setDisplayName(_displayName);
-  }, [fullPath]);
+  const displayName = getDisplayName(fullPath);
 
   return (
     <div
