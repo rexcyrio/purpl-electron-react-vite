@@ -3,10 +3,16 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
-import { toggleQuickLook, updateQuickLookIfNeeded } from "@renderer/store/slices/quickLookSlice";
+import {
+  closeQuickLookUsingIfNeeded,
+  toggleQuickLook,
+  updateQuickLookIfNeeded
+} from "@renderer/store/slices/quickLookSlice";
 import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import React, { useCallback, useEffect, useMemo } from "react";
 import ButtonWrapper from "./ButtonWrapper";
+
+let didInit = false;
 
 function ButtonQuickLook(): JSX.Element {
   const dispatch = useAppDispatch();
@@ -16,6 +22,39 @@ function ButtonQuickLook(): JSX.Element {
   useEffect(() => {
     dispatch(updateQuickLookIfNeeded());
   }, [dispatch, activeFileExplorerItem]);
+
+  useEffect(() => {
+    if (didInit) {
+      return;
+    }
+
+    didInit = true;
+
+    document.addEventListener("keydown", (event) => {
+      switch (event.key) {
+        case " ":
+          if (event.repeat) {
+            break;
+          }
+
+          event.preventDefault();
+          dispatch(toggleQuickLook());
+          break;
+
+        case "Escape":
+          if (event.repeat) {
+            break;
+          }
+
+          event.preventDefault();
+          dispatch(closeQuickLookUsingIfNeeded("currentFullPath"));
+          break;
+
+        default:
+          break;
+      }
+    });
+  }, [dispatch]);
 
   const handleToggleQuickLook = useCallback(() => {
     dispatch(toggleQuickLook());

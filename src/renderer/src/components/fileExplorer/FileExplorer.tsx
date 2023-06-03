@@ -9,7 +9,6 @@ import {
   upArrow
 } from "../../store/slices/fileExplorerItemsSlice";
 import { fillArray } from "../../utilities/fillArray";
-import { toggleQuickLook } from "@renderer/store/slices/quickLookSlice";
 
 let didInit = false;
 
@@ -45,15 +44,6 @@ function FileExplorer(): JSX.Element {
         case "ArrowRight":
           event.preventDefault();
           dispatch(rightArrow());
-          break;
-
-        case " ":
-          if (event.repeat) {
-            break;
-          }
-
-          event.preventDefault();
-          dispatch(toggleQuickLook());
           break;
 
         default:

@@ -118,4 +118,16 @@ export function updateQuickLookIfNeeded(): ThunkAction<void, RootState, unknown,
   };
 }
 
+export function closeQuickLookUsingIfNeeded(
+  fullPathType: "currentFullPath" | "oldFullPath"
+): ThunkAction<void, RootState, unknown, AnyAction> {
+  return async function thunk(dispatch, getState) {
+    const state = getState();
+
+    if (state.quickLook.isOpen) {
+      dispatch(_closeQuickLookUsing(fullPathType));
+    }
+  };
+}
+
 export default quickLookSlice.reducer;
