@@ -2,7 +2,7 @@ import { useAppDispatch } from "@renderer/store/hooks";
 import PropTypes from "prop-types";
 import React, { useCallback } from "react";
 import ColumnWrapper from "./ColumnWrapper";
-import { navigateTo } from "@renderer/store/slices/itemsSlice";
+import { navigateTo } from "@renderer/store/slices/fileExplorerItemsSlice";
 
 ColumnEmptyFolder.propTypes = {
   columnIndex: PropTypes.number.isRequired
