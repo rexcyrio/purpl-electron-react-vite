@@ -1,6 +1,6 @@
 import { useAppDispatch } from "@renderer/store/hooks";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useCallback } from "react";
 import ColumnWrapper from "./ColumnWrapper";
 import { navigateTo } from "@renderer/store/slices/itemsSlice";
 
@@ -11,20 +11,14 @@ ColumnEmptyFolder.propTypes = {
 function ColumnEmptyFolder({ columnIndex }): JSX.Element {
   const dispatch = useAppDispatch();
 
-  function columnEmptyFolderRef_fn(refElement) {
-    if (refElement === null) {
-      return;
-    }
-
-    refElement.addEventListener("click", () => {
-      dispatch(navigateTo(columnIndex, -1));
-    });
-  }
+  const handleClick = useCallback(() => {
+    dispatch(navigateTo(columnIndex, -1));
+  }, [dispatch, columnIndex]);
 
   return (
     <ColumnWrapper>
       <div
-        ref={columnEmptyFolderRef_fn}
+        onClick={handleClick}
         style={{
           height: "100%"
         }}
