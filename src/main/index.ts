@@ -7,8 +7,9 @@ import os from "os";
 import path, { join } from "path";
 import icon from "../../resources/icon.png?asset";
 import { JSONFileWrapper } from "./JSONFileWrapper";
-import { assertTrueAsync } from "./assertion";
+import { assertTrue, assertTrueAsync } from "./assertion";
 import { doesFileExist } from "./doesFileExist";
+import { senderIsValid } from "./senderIsValid";
 
 const USERPROFILE = os.homedir();
 const WILDCARD = "*";
@@ -106,15 +107,21 @@ app.on("window-all-closed", () => {
 const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
 
 ipcMain.on("QUIT_APP", (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   app.quit();
 });
 
 ipcMain.on("OPEN_FILE_EXPLORER", (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const fullPath = arg;
   cmd.exec(`explorer.exe "${fullPath}"`);
 });
 
 ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   // use the `QuickLook.exe` that the user provided (if possible)
   if (SETTINGS.exists("quickLookExePath")) {
     const quickLookExePath = SETTINGS.get("quickLookExePath");
@@ -158,12 +165,16 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
 });
 
 ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   // TODO: check settings
   // return __dirname;
   return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
 });
 
 ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const folderPath = arg;
 
   await assertTrueAsync(() => {
@@ -188,6 +199,8 @@ ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
 });
 
 ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   return new Promise<fswin.LogicalDriveList>((resolve, reject) => {
     fswin.getLogicalDriveList((result) => {
       resolve(result);
@@ -196,17 +209,23 @@ ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
 });
 
 ipcMain.handle("GET_ICON", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const filePath = arg;
   const icon = await app.getFileIcon(filePath, { size: "normal" });
   return icon.toDataURL();
 });
 
 ipcMain.handle("DOES_FILE_EXIST", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const fullPath = arg;
   return await doesFileExist(fullPath);
 });
 
 ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const folderPath = arg;
   await fs.promises.mkdir(folderPath);
 });
@@ -216,6 +235,8 @@ ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
 // ============================================================================
 
 ipcMain.handle("MOVE_ITEM", async (event, arg) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   const { from_fullPath, to_fullPath } = arg;
   // TODO: remove
   throw new Error(Date.now().toString());
@@ -224,6 +245,8 @@ ipcMain.handle("MOVE_ITEM", async (event, arg) => {
 });
 
 ipcMain.on("ondragstart", (event, filePath) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
   console.log("dragging start");
   event.sender.startDrag({
     file: filePath,
