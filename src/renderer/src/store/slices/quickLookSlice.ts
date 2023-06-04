@@ -1,5 +1,4 @@
 import { AnyAction, PayloadAction, ThunkAction, createSlice } from "@reduxjs/toolkit";
-import { apiRunQuickLook } from "@renderer/utilities/api";
 import { AssertionError, assertTrue } from "@renderer/utilities/assertion";
 import {
   getActiveFileExplorerItem,
@@ -51,7 +50,7 @@ function _openQuickLook(fullPath: string): ThunkAction<void, RootState, unknown,
 
     dispatch(_setIsOpenTrue());
     dispatch(_setFullPath(fullPath));
-    apiRunQuickLook(fullPath);
+    window.api.runQuickLook(fullPath);
   };
 }
 
@@ -69,10 +68,10 @@ function _closeQuickLookUsing(
     if (fullPathType === "currentFullPath") {
       const activeFileExplorerItem = getActiveFileExplorerItem(state);
       const fullPath = activeFileExplorerItem.fullPath;
-      apiRunQuickLook(fullPath);
+      window.api.runQuickLook(fullPath);
     } else if (fullPathType === "oldFullPath") {
       const oldFullPath = state.quickLook.fullPath;
-      apiRunQuickLook(oldFullPath);
+      window.api.runQuickLook(oldFullPath);
     } else {
       throw new AssertionError();
     }
@@ -113,7 +112,7 @@ export function updateQuickLookIfNeeded(): ThunkAction<void, RootState, unknown,
 
       const fullPath = activeFileExplorerItem.fullPath;
       dispatch(_setFullPath(fullPath));
-      apiRunQuickLook(fullPath);
+      window.api.runQuickLook(fullPath);
     }
   };
 }

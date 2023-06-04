@@ -4,12 +4,6 @@ import {
   createFileExplorerDriveItem,
   createFileExplorerFileOrFolderItem
 } from "@renderer/utilities/FileExplorerItem";
-import {
-  apiCreateNewFolder,
-  apiDoesFileExist,
-  apiGetFsWinDirectoryContents,
-  apiGetStartingDirectory
-} from "@renderer/utilities/api";
 import { AssertionError, assertTrue } from "@renderer/utilities/assertion";
 import {
   ALL_SPECIAL_FILE_EXPLORER_ITEMS,
@@ -158,7 +152,7 @@ export function initReduxStore(): ThunkAction<Promise<void>, RootState, unknown,
     dispatch(_addColumn(drivesColumn));
 
     // populating file explorer
-    const startingDirectory = await apiGetStartingDirectory();
+    const startingDirectory = await window.api.getStartingDirectory();
     const incrementalFullPaths = getIncrementalFullPaths(startingDirectory);
 
     // adding column
@@ -281,7 +275,7 @@ export function createColumn(
   fullPath: string
 ): ThunkAction<Promise<FileExplorerItem[]>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<FileExplorerItem[]> {
-    const fsWinDirectoryContents = await apiGetFsWinDirectoryContents(fullPath);
+    const fsWinDirectoryContents = await window.api.getFsWinDirectoryContents(fullPath);
     const column: FileExplorerItem[] = [];
 
     for (const fsWinFile of fsWinDirectoryContents) {
@@ -475,7 +469,7 @@ export function navigateToFullPath(
   fullPath: string
 ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
-    const doesFileExist = await apiDoesFileExist(fullPath);
+    const doesFileExist = await window.api.doesFileExist(fullPath);
 
     if (!doesFileExist) {
       dispatch(openErrorSnackbarWithAlertText(`"${fullPath}" does not exist.`));
@@ -567,7 +561,7 @@ export function createNewFolder(
     const activeFileExplorerItem = getActiveFileExplorerItem(state);
     const fullPath = activeFileExplorerItem.fullPath;
     const folderPath = replaceBasename(fullPath, newFolderName);
-    apiCreateNewFolder(folderPath);
+    window.api.createNewFolder(folderPath);
   };
 }
 

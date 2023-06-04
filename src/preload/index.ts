@@ -1,19 +1,36 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
+import type fswin from "fswin";
+
+// invoke   = asynchronous +    response
+// send     = asynchronous + NO response
+// sendSync =  synchronous +    response
 
 // Custom APIs for renderer
-const api = {
-  // asynchronous + response
-  invoke: async (channel: string, data: any): Promise<any> => {
-    return await ipcRenderer.invoke(channel, data);
+export const api = {
+  quitApp: (): void => {
+    ipcRenderer.send("QUIT_APP");
   },
-  // synchronous + response
-  sendSync: (channel: string, data: any): any => {
-    return ipcRenderer.sendSync(channel, data);
+  openFileExplorer: (folderPath: string): void => {
+    ipcRenderer.send("OPEN_FILE_EXPLORER", folderPath);
   },
-  // asynchronous + NO response
-  send: (channel: string, data: any): void => {
-    ipcRenderer.send(channel, data);
+  runQuickLook: (fullPath: string): void => {
+    ipcRenderer.send("RUN_QUICK_LOOK", fullPath);
+  },
+  getStartingDirectory: async (): Promise<string> => {
+    return await ipcRenderer.invoke("GET_STARTING_DIRECTORY");
+  },
+  getFsWinDirectoryContents: async (folderPath: string): Promise<fswin.Find.File[]> => {
+    return await ipcRenderer.invoke("GET_FS_WIN_DIRECTORY_CONTENTS", folderPath);
+  },
+  getListOfDrives: async (): Promise<fswin.LogicalDriveList> => {
+    return await ipcRenderer.invoke("GET_LIST_OF_DRIVES");
+  },
+  doesFileExist: async (fullPath: string): Promise<boolean> => {
+    return await ipcRenderer.invoke("DOES_FILE_EXIST", fullPath);
+  },
+  createNewFolder: async (folderPath: string): Promise<void> => {
+    return await ipcRenderer.invoke("CREATE_NEW_FOLDER", folderPath);
   }
 };
 

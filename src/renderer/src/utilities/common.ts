@@ -1,5 +1,5 @@
 import { createFileExplorerFileItem } from "./FileExplorerItem";
-import fswin from "fswin";
+import type fswin from "fswin";
 
 export const WINDOWS_PATH_SEPARATOR = "\\";
 

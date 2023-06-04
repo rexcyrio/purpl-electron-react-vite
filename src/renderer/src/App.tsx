@@ -7,7 +7,6 @@ import Sidebar from "./components/sidebar/Sidebar";
 import Topbar from "./components/topbar/Topbar";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { initReduxStore } from "./store/slices/fileExplorerItemsSlice";
-import { apiQuitApp } from "./utilities/api";
 
 let didInit = false;
 
@@ -32,7 +31,7 @@ function App(): JSX.Element {
           }
 
           event.preventDefault();
-          apiQuitApp();
+          window.api.quitApp();
           break;
 
         default:

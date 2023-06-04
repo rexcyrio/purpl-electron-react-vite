@@ -68,7 +68,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
     r.current?.addEventListener("dragstart", (event) => {
       event.preventDefault();
       event.dataTransfer?.setData("text/plain/", "abc");
-      window.api.send("ondragstart", "C:\\Users\\Stefan Lee\\Downloads\\SAF100.pdf");
+      // window.api.send("ondragstart", "C:\\Users\\Stefan Lee\\Downloads\\SAF100.pdf");
     });
 
     r.current?.addEventListener("drop", (event) => {

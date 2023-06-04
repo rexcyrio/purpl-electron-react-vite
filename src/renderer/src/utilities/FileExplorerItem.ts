@@ -1,4 +1,4 @@
-import fswin from "fswin";
+import type fswin from "fswin";
 import { filesize } from "filesize";
 
 export interface FileExplorerItem {

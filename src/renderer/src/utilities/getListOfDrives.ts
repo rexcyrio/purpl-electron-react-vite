@@ -1,10 +1,9 @@
-import fswin from "fswin";
-import { apiGetListOfDrives } from "./api";
+import type fswin from "fswin";
 import { AssertionError } from "./assertion";
 import { isUpperCase } from "./isUpperCase";
 
 export async function getListOfDrives(): Promise<fswin.LogicalDriveList> {
-  const drives = await apiGetListOfDrives();
+  const drives = await window.api.getListOfDrives();
   const driveLetters = Object.keys(drives);
 
   for (const driveLetter of driveLetters) {

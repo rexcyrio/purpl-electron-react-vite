@@ -106,7 +106,7 @@ app.on("window-all-closed", () => {
 
 const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
 
-ipcMain.on("QUIT", (event, arg) => {
+ipcMain.on("QUIT_APP", (event, arg) => {
   app.quit();
 });
 
