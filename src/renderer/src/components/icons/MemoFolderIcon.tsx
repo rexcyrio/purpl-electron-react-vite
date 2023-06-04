@@ -1,14 +1,11 @@
 import React from "react";
-import { FaFolder } from "react-icons/fa";
+import FolderIcon from "@mui/icons-material/Folder";
 
 function MemoFolderIcon(): JSX.Element {
   return (
-    <FaFolder
+    <FolderIcon
       style={{
-        height: "1.25rem",
-        width: "1.25rem",
-        color: "#73d2fc",
-        flexShrink: "0"
+        color: "#73d2fc"
       }}
     />
   );

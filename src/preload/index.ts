@@ -25,6 +25,9 @@ export const api = {
   getListOfDrives: async (): Promise<fswin.LogicalDriveList> => {
     return await ipcRenderer.invoke("GET_LIST_OF_DRIVES");
   },
+  getIcon: async (filePath: string): Promise<string> => {
+    return await ipcRenderer.invoke("GET_ICON", filePath);
+  },
   doesFileExist: async (fullPath: string): Promise<boolean> => {
     return await ipcRenderer.invoke("DOES_FILE_EXIST", fullPath);
   },

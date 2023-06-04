@@ -129,7 +129,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
           // opacity: isDragging ? 0.4 : 1
         }}
       >
-        <VirtualisedRowIcon type={self.type} isActive={isActive} />
+        <VirtualisedRowIcon self={self} />
         <VirtualisedRowDisplayName displayName={self.displayName} isActive={isActive} />
       </div>
 

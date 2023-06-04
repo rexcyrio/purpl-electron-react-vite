@@ -195,6 +195,12 @@ ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
   });
 });
 
+ipcMain.handle("GET_ICON", async (event, arg) => {
+  const filePath = arg;
+  const icon = await app.getFileIcon(filePath, { size: "normal" });
+  return icon.toDataURL();
+});
+
 ipcMain.handle("DOES_FILE_EXIST", async (event, arg) => {
   const fullPath = arg;
   return await doesFileExist(fullPath);

@@ -1,14 +1,13 @@
-import PropTypes from "prop-types";
+import { FileExplorerItem } from "@renderer/utilities/FileExplorerItem";
 import React from "react";
-import MemoFolderIcon from "../icons/MemoFolderIcon";
 import MemoFileIcon from "../icons/MemoFileIcon";
+import MemoFolderIcon from "../icons/MemoFolderIcon";
 
-VirtualisedRowIcon.propTypes = {
-  type: PropTypes.oneOf(["drive", "folder", "file"]).isRequired,
-  isActive: PropTypes.bool.isRequired
-};
+interface VirtualisedRowIconProps {
+  self: FileExplorerItem;
+}
 
-function VirtualisedRowIcon({ type, isActive }): JSX.Element {
+function VirtualisedRowIcon({ self }: VirtualisedRowIconProps): JSX.Element {
   return (
     <div
       style={{
@@ -18,7 +17,11 @@ function VirtualisedRowIcon({ type, isActive }): JSX.Element {
         marginLeft: "0.25rem"
       }}
     >
-      {type === "folder" ? <MemoFolderIcon /> : <MemoFileIcon isActive={isActive} size="small" />}
+      {self.type === "file" ? (
+        <MemoFileIcon filePath={self.fullPath} size="small" />
+      ) : (
+        <MemoFolderIcon />
+      )}
     </div>
   );
 }
