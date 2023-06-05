@@ -12,8 +12,6 @@ import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFil
 import React, { useCallback, useEffect, useMemo } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
-let didInit = false;
-
 function ButtonQuickLook(): JSX.Element {
   const dispatch = useAppDispatch();
   const isQuickLookOpen = useAppSelector((state) => state.quickLook.isOpen);
@@ -23,14 +21,8 @@ function ButtonQuickLook(): JSX.Element {
     dispatch(updateQuickLookIfNeeded());
   }, [dispatch, activeFileExplorerItem]);
 
-  useEffect(() => {
-    if (didInit) {
-      return;
-    }
-
-    didInit = true;
-
-    document.addEventListener("keydown", (event) => {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       switch (event.key) {
         case " ":
           if (event.repeat) {
@@ -53,8 +45,14 @@ function ButtonQuickLook(): JSX.Element {
         default:
           break;
       }
-    });
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   const handleToggleQuickLook = useCallback(() => {
     dispatch(toggleQuickLook());

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import ScrollableColumnDivWrapper from "./ScrollableColumnDivWrapper";
 import SideScroller from "./SideScroller";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -10,21 +10,13 @@ import {
 } from "../../store/slices/fileExplorerItemsSlice";
 import { fillArray } from "../../utilities/fillArray";
 
-let didInit = false;
-
 function FileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
   const fileExplorerRef = useRef<HTMLDivElement | null>(null);
   const numColumns = useAppSelector((state) => state.fileExplorerItems.columns.length);
 
-  useEffect(() => {
-    if (didInit) {
-      return;
-    }
-
-    didInit = true;
-
-    document.addEventListener("keydown", (event) => {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       switch (event.key) {
         case "ArrowUp":
           event.preventDefault();
@@ -49,8 +41,14 @@ function FileExplorer(): JSX.Element {
         default:
           break;
       }
-    });
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <div

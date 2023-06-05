@@ -1,6 +1,6 @@
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import ErrorSnackbar from "./ErrorSnackbar";
 import FileExplorer from "./components/fileExplorer/FileExplorer";
 import Sidebar from "./components/sidebar/Sidebar";
@@ -15,30 +15,32 @@ function App(): JSX.Element {
   const isReady = useAppSelector((state) => state.isReady);
 
   useEffect(() => {
-    if (didInit) {
-      return;
+    if (!didInit) {
+      didInit = true;
+      dispatch(initReduxStore());
     }
-
-    didInit = true;
-
-    dispatch(initReduxStore());
-
-    document.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "q":
-          if (event.repeat) {
-            break;
-          }
-
-          event.preventDefault();
-          window.api.quitApp();
-          break;
-
-        default:
-          break;
-      }
-    });
   }, [dispatch]);
+
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    switch (event.key) {
+      case "q":
+        if (event.repeat) {
+          break;
+        }
+
+        event.preventDefault();
+        window.api.quitApp();
+        break;
+
+      default:
+        break;
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <>

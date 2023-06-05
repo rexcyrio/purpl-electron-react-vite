@@ -7,37 +7,32 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
-
-let didInit = false;
 
 function ButtonHelpWindow(): JSX.Element {
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (didInit) {
-      return;
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    switch (event.key) {
+      case "?":
+        if (event.repeat) {
+          break;
+        }
+
+        event.preventDefault();
+        setDialogOpen((prev) => !prev);
+        break;
+
+      default:
+        break;
     }
-
-    didInit = true;
-
-    document.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "?":
-          if (event.repeat) {
-            break;
-          }
-
-          event.preventDefault();
-          setDialogOpen((prev) => !prev);
-          break;
-
-        default:
-          break;
-      }
-    });
   }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   function handleDialogOpen(): void {
     setDialogOpen(true);
