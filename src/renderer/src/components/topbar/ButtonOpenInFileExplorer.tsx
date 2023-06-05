@@ -2,22 +2,15 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useAppDispatch } from "@renderer/store/hooks";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import ButtonWrapper from "./ButtonWrapper";
-
-let didInit = false;
+import { openFileExplorer } from "@renderer/store/slices/fileExplorerItemsSlice";
 
 function ButtonOpenInFileExplorer(): JSX.Element {
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (didInit) {
-      return;
-    }
-
-    didInit = true;
-
-    document.addEventListener("keydown", (event) => {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       switch (event.key) {
         case "e":
           if (event.repeat) {
@@ -25,18 +18,24 @@ function ButtonOpenInFileExplorer(): JSX.Element {
           }
 
           event.preventDefault();
-          // dispatch(openFileExplorer());
+          dispatch(openFileExplorer());
           break;
 
         default:
           break;
       }
-    });
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
-    // dispatch(openFileExplorer());
+    dispatch(openFileExplorer());
   }
 
   return (

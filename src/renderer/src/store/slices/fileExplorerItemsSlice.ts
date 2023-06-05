@@ -12,24 +12,29 @@ import {
   SPECIAL_FILE_EXPLORER_ITEM_LOADING,
   WINDOWS_PATH_SEPARATOR
 } from "@renderer/utilities/common";
-import { getActiveFileExplorerItem } from "@renderer/utilities/getActiveFileExplorerItem";
+import {
+  getActiveFileExplorerItem
+} from "@renderer/utilities/getActiveFileExplorerItem";
 import { getArrayIndexOfFirstDifferentElement } from "@renderer/utilities/getArrayIndexOfFirstDifferentElement";
 import { getColumn } from "@renderer/utilities/getColumn";
 import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
 import { getDisplayName } from "@renderer/utilities/getDisplayName";
+import {
+  getFileExplorerItem
+} from "@renderer/utilities/getFileExplorerItem";
 import { getIncrementalFullPaths } from "@renderer/utilities/getIncrementalFullPaths";
 import { getLastColumn } from "@renderer/utilities/getLastColumn";
 import { getListOfDrives } from "@renderer/utilities/getListOfDrives";
 import { getPathComponents } from "@renderer/utilities/getPathComponents";
 import { getPreviewColumn } from "@renderer/utilities/getPreviewColumn";
+import { getSelectedFileExplorerItemInColumn } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
 import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
 import { removeTrailingPathSeparatorIfNeeded } from "@renderer/utilities/removeTrailingPathSeparatorIfNeeded";
 import { replaceBasename } from "@renderer/utilities/replaceBasename";
 import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderFirst";
 import { RootState } from "../store";
-import { setIsReady } from "./isReadySlice";
-import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
 import { openErrorSnackbarWithAlertText } from "./errorSnackbarSlice";
+import { setIsReady } from "./isReadySlice";
 
 export interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
@@ -562,6 +567,22 @@ export function createNewFolder(
     const fullPath = activeFileExplorerItem.fullPath;
     const folderPath = replaceBasename(fullPath, newFolderName);
     window.api.createNewFolder(folderPath);
+  };
+}
+
+export function openFileExplorer(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
+  return async function thunk(dispatch, getState): Promise<void> {
+    const state = getState();
+
+    const [activeColumnIndex, activeRowIndex] =
+      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+
+    if (activeColumnIndex === 0) {
+      window.api.openFileExplorer("");
+    } else {
+      const parentFolder = getSelectedFileExplorerItemInColumn(state, activeColumnIndex - 1);
+      window.api.openFileExplorer(parentFolder.fullPath);
+    }
   };
 }
 
