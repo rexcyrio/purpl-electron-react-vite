@@ -80,14 +80,16 @@ function formatSize(numberOfBytes: number): string {
 }
 
 function formatDate(date: Date): string {
-  const d = date.getDate();
-  const m = date.getMonth() + 1; // return value is 0-indexed
-  const yyyy = date.getFullYear();
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // getMonth() is 0-indexed
+  const year = date.getFullYear();
 
-  const h24 = date.getHours();
-  const h12 = h24 >= 13 ? h24 - 12 : h24;
-  const minutes = date.getMinutes();
-  const AM_PM_string = h24 <= 11 ? "AM" : "PM";
+  // see https://stackoverflow.com/a/55823036 for the differences between "h11", "h12", "h23" and "h24"
+  const h23 = date.getHours();
+  const h11 = h23 % 12;
+  const h12 = h11 === 0 ? 12 : h11;
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const ampm = h23 <= 11 ? "AM" : "PM";
 
-  return `${d}/${m}/${yyyy}, ${h12}:${minutes} ${AM_PM_string}`;
+  return `${day}/${month}/${year}, ${h12}:${minutes} ${ampm}`;
 }
