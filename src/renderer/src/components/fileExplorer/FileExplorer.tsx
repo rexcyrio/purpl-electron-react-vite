@@ -62,7 +62,8 @@ function FileExplorer(): JSX.Element {
         style={{
           overflowX: "scroll",
           overflowY: "hidden",
-          display: "flex"
+          display: "flex",
+          height: "100%"
         }}
       >
         {fillArray(0, numColumns).map((_, columnIndex) => (

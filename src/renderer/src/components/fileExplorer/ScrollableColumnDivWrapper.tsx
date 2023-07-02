@@ -126,10 +126,8 @@ function ScrollableColumnDivWrapper({ columnIndex }): JSX.Element {
     <div
       ref={divWrapperRef}
       style={{
-        height: "calc(100vh - 4rem - 1px)",
         width: "15rem",
         flexShrink: "0",
-        verticalAlign: "top",
         backgroundColor: getBackgroundColour()
       }}
     >
