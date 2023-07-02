@@ -11,60 +11,72 @@ function ColumnFileInfo(): JSX.Element {
       style={{
         height: "100%",
         overflowY: "scroll",
-
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center"
+        display: "flex"
       }}
     >
-      <MemoFileIcon isActive={false} size="large" />
       <div
         style={{
-          marginTop: "1rem",
-          padding: "0 1rem",
-          textAlign: "center",
-          wordBreak: "normal",
-          overflowWrap: "anywhere"
-        }}
-      >
-        {self.displayName}
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          fontSize: "0.75rem",
-          marginTop: "1rem"
+          // see https://stackoverflow.com/a/33455342 for why "margin: auto" was used
+          // instead of "align-items: center" and "justify-content: center"
+          margin: "auto"
         }}
       >
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "end"
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "1rem"
           }}
         >
-          {ATTRIBUTE_NAMES.map((attributeName) => (
-            <div key={attributeName} style={{ color: "grey" }}>
-              {attributeName}
+          <MemoFileIcon filePath={self.fullPath} size="large" />
+          <div
+            style={{
+              padding: "0 1rem",
+              textAlign: "center",
+              wordBreak: "normal",
+              overflowWrap: "anywhere"
+            }}
+          >
+            {self.displayName}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              fontSize: "0.75rem",
+              gap: "0.5rem"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "end"
+              }}
+            >
+              {ATTRIBUTE_NAMES.map((attributeName) => (
+                <div key={attributeName} style={{ color: "grey" }}>
+                  {attributeName}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "start",
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
 
-            marginLeft: "0.5rem",
-            width: "7.75rem"
-          }}
-        >
-          {ATTRIBUTE_NAMES.map((attributeName) => (
-            <div key={attributeName}>{self[attributeName]}</div>
-          ))}
+                width: "7.5rem"
+              }}
+            >
+              {ATTRIBUTE_NAMES.map((attributeName) => (
+                <div key={attributeName}>{self[attributeName]}</div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
