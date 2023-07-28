@@ -8,7 +8,9 @@ MemoFileIcon.propTypes = {
 };
 
 function MemoFileIcon({ filePath, size }): JSX.Element {
-  const [imageSource, setImageSource] = useState<string | undefined>(undefined);
+  const [imageSource, setImageSource] = useState(
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+  );
 
   useEffect(() => {
     window.api.getIcon(filePath).then((dataUrl) => setImageSource(dataUrl));
