@@ -4,7 +4,7 @@ import { BrowserWindow, app, dialog, ipcMain, shell } from "electron";
 import fs from "fs";
 import fswin from "fswin";
 import os from "os";
-import path, { join } from "path";
+import path from "path";
 import icon from "../../resources/icon.png?asset";
 import { JSONFileWrapper } from "./JSONFileWrapper";
 import { assertTrue, assertTrueAsync } from "./assertion";
@@ -35,7 +35,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js")
+      preload: path.join(__dirname, "../preload/index.js")
     }
   });
 
@@ -54,7 +54,7 @@ function createWindow(): void {
     MAIN_WINDOW.loadURL(process.env["ELECTRON_RENDERER_URL"]);
     installDevExtensions();
   } else {
-    MAIN_WINDOW.loadFile(join(__dirname, "../renderer/index.html"));
+    MAIN_WINDOW.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 }
 
