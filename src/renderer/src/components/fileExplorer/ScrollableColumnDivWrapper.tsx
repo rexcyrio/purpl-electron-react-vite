@@ -1,6 +1,7 @@
 import { useAppSelector } from "@renderer/store/hooks";
 import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
+import type * as CSS from "csstype";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
 import VirtualisedColumn from "./VirtualisedColumn";
@@ -104,7 +105,7 @@ function ScrollableColumnDivWrapper({ columnIndex }): JSX.Element {
   //   drop(refElement);
   // }
 
-  function getBackgroundColour(): string {
+  function getBackgroundColour(): CSS.Property.BackgroundColor {
     return "transparent";
     // if (isOver) {
     //   if (canDrop) {

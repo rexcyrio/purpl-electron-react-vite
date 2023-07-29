@@ -3,6 +3,7 @@ import { navigateTo } from "@renderer/store/slices/fileExplorerItemsSlice";
 import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
 import { getSelectedFileExplorerItemInColumnIfAny } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
+import type * as CSS from "csstype";
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useRef } from "react";
 import MemoArrowRight from "../icons/MemoArrowRight";
@@ -138,7 +139,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
   );
 }
 
-function getBackgroundColour(isSelected: boolean, isActive: boolean): string {
+function getBackgroundColour(isSelected: boolean, isActive: boolean): CSS.Property.BackgroundColor {
   if (isActive) {
     return "#0068d9";
   }
