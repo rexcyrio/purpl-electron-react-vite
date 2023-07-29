@@ -14,6 +14,16 @@ import { senderIsValid } from "./senderIsValid";
 const USERPROFILE = os.homedir();
 const WILDCARD = "*";
 
+const THUMBNAIL_UTILITIES_EXE_PATH = is.dev
+  ? path.win32.join(
+      __dirname,
+      "../../external/ThumbnailUtilities/minified-release/ThumbnailUtilities.exe"
+    )
+  : path.win32.join(
+      __dirname,
+      "../external/ThumbnailUtilities/minified-release/ThumbnailUtilities.exe"
+    );
+
 let MAIN_WINDOW: BrowserWindow;
 
 function createWindow(): void {
@@ -208,12 +218,41 @@ ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
   });
 });
 
-ipcMain.handle("GET_ICON", async (event, arg) => {
+ipcMain.handle("GET_SMALL_ICON", async (event, filePath: string): Promise<string> => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const filePath = arg;
   const icon = await app.getFileIcon(filePath, { size: "normal" });
-  return icon.toDataURL();
+  const dataUrl = icon.toDataURL();
+  return dataUrl;
+});
+
+ipcMain.handle("GET_LARGE_ICON", async (event, filePath: string): Promise<string> => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
+  const data = await new Promise<string>((resolve, reject) => {
+    const externalChildProcess = cmd.spawn(THUMBNAIL_UTILITIES_EXE_PATH, [filePath, "160"]);
+
+    const bufferArray: Buffer[] = [];
+
+    externalChildProcess.stdout.on("data", (buffer: Buffer) => {
+      bufferArray.push(buffer);
+    });
+
+    externalChildProcess.stdout.on("close", (code: number, signal: string) => {
+      const dataUrlComponents = bufferArray.map((buffer) => buffer.toString("utf8"));
+      const dataUrl = dataUrlComponents.join("");
+      resolve(dataUrl);
+    });
+
+    externalChildProcess.stderr.on("data", async (buffer: Buffer) => {
+      // fallback to Electron's `getFileIcon` when ThumbnailUtilities throws an error
+      const icon = await app.getFileIcon(filePath, { size: "normal" });
+      const dataUrl = icon.toDataURL();
+      resolve(dataUrl);
+    });
+  });
+
+  return data;
 });
 
 ipcMain.handle("DOES_FILE_EXIST", async (event, arg) => {

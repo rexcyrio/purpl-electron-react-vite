@@ -1,3 +1,4 @@
+import { AssertionError } from "@renderer/utilities/assertion";
 import type * as CSS from "csstype";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
@@ -13,8 +14,14 @@ function MemoFileIcon({ filePath, size }): JSX.Element {
   );
 
   useEffect(() => {
-    window.api.getIcon(filePath).then((dataUrl) => setImageSource(dataUrl));
-  }, [filePath]);
+    if (size === "small") {
+      window.api.getSmallIcon(filePath).then((dataUrl) => setImageSource(dataUrl));
+    } else if (size === "large") {
+      window.api.getLargeIcon(filePath).then((dataUrl) => setImageSource(dataUrl));
+    } else {
+      throw new AssertionError();
+    }
+  }, [filePath, size]);
 
   return (
     <img
