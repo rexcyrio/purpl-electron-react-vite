@@ -16,6 +16,9 @@ export const api = {
   runQuickLook: (fullPath: string): void => {
     ipcRenderer.send("RUN_QUICK_LOOK", fullPath);
   },
+  startDrag: (fullPath: string): void => {
+    ipcRenderer.send("START_DRAG", fullPath);
+  },
   getStartingDirectory: async (): Promise<string> => {
     return await ipcRenderer.invoke("GET_STARTING_DIRECTORY");
   },

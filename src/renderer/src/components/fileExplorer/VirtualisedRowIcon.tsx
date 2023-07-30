@@ -4,10 +4,11 @@ import MemoFileIcon from "../icons/MemoFileIcon";
 import MemoFolderIcon from "../icons/MemoFolderIcon";
 
 interface VirtualisedRowIconProps {
-  self: FileExplorerItem;
+  type: FileExplorerItem["type"];
+  fullPath: FileExplorerItem["fullPath"];
 }
 
-function VirtualisedRowIcon({ self }: VirtualisedRowIconProps): JSX.Element {
+function VirtualisedRowIcon({ type, fullPath }: VirtualisedRowIconProps): JSX.Element {
   return (
     <div
       style={{
@@ -17,11 +18,7 @@ function VirtualisedRowIcon({ self }: VirtualisedRowIconProps): JSX.Element {
         marginLeft: "0.25rem"
       }}
     >
-      {self.type === "file" ? (
-        <MemoFileIcon filePath={self.fullPath} size="small" />
-      ) : (
-        <MemoFolderIcon />
-      )}
+      {type === "file" ? <MemoFileIcon filePath={fullPath} size="small" /> : <MemoFolderIcon />}
     </div>
   );
 }

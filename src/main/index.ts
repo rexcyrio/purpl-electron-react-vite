@@ -1,8 +1,9 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import cmd from "child_process";
-import { BrowserWindow, app, dialog, ipcMain, shell } from "electron";
+import { BrowserWindow, app, dialog, ipcMain, nativeImage, shell } from "electron";
 import fs from "fs";
 import fswin from "fswin";
+import Jimp from "jimp";
 import os from "os";
 import path from "path";
 import icon from "../../resources/icon.png?asset";
@@ -173,6 +174,35 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, fullPath: string) => {
   cmd.exec(`"${userQuickLookExePath}" "${fullPath}"`);
 });
 
+ipcMain.on("START_DRAG", async (event, fullPath: string) => {
+  assertTrue(() => senderIsValid(event.senderFrame));
+
+  const displayName = fullPath.split(path.win32.sep).at(-1);
+
+  const font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+  const horizontalPadding = 5;
+  const verticalPadding = 3;
+
+  const width = 140;
+  const height = Jimp.measureTextHeight(font, "abc", 100) + 2 * verticalPadding;
+
+  new Jimp(width, height, "#0068d9", async (error, image) => {
+    if (error) {
+      throw error;
+    }
+
+    image.print(font, horizontalPadding, verticalPadding, displayName);
+
+    const dataUrl = await image.getBase64Async(Jimp.MIME_PNG);
+    const myNativeImage = nativeImage.createFromDataURL(dataUrl);
+
+    event.sender.startDrag({
+      file: fullPath,
+      icon: myNativeImage
+    });
+  });
+});
+
 ipcMain.handle("GET_STARTING_DIRECTORY", async (event) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
@@ -289,14 +319,4 @@ ipcMain.handle("MOVE_ITEM", async (event, arg) => {
   throw new Error(Date.now().toString());
 
   await fs.promises.rename(from_fullPath, to_fullPath);
-});
-
-ipcMain.on("ondragstart", (event, filePath) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  console.log("dragging start");
-  event.sender.startDrag({
-    file: filePath,
-    icon: icon
-  });
 });

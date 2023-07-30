@@ -18,14 +18,34 @@ VirtualisedRow.propTypes = {
 
 function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Element {
   const dispatch = useAppDispatch();
+  const virtualisedRowRef = useRef<HTMLDivElement | null>(null);
 
   const self = useAppSelector((state) => getFileExplorerItem(state, columnIndex, rowIndex));
+
+  const isActive = useAppSelector((state) => self === getActiveFileExplorerItemIfAny(state));
 
   const isSelected = useAppSelector(
     (state) => self === getSelectedFileExplorerItemInColumnIfAny(state, columnIndex)
   );
 
-  const isActive = useAppSelector((state) => self === getActiveFileExplorerItemIfAny(state));
+  const handleDragStart = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault();
+      window.api.startDrag(self.fullPath);
+    },
+    [self.fullPath]
+  );
+
+  useEffect(() => {
+    if (virtualisedRowRef.current === null) {
+      return;
+    }
+
+    virtualisedRowRef.current.addEventListener("dragstart", handleDragStart);
+
+    const ref = virtualisedRowRef.current;
+    return () => ref.removeEventListener("dragstart", handleDragStart);
+  }, [handleDragStart]);
 
   // const [{ isDragging }, drag, dragPreview] = useDrag(
   //   () => ({
@@ -63,21 +83,6 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
 
   // ==========================================================================
 
-  const r: React.Ref<HTMLDivElement> = useRef(null);
-
-  useEffect(() => {
-    r.current?.addEventListener("dragstart", (event) => {
-      event.preventDefault();
-      event.dataTransfer?.setData("text/plain/", "abc");
-      // window.api.send("ondragstart", "C:\\Users\\Stefan Lee\\Downloads\\SAF100.pdf");
-    });
-
-    r.current?.addEventListener("drop", (event) => {
-      event.preventDefault();
-      console.log(event);
-    });
-  }, []);
-
   // ==========================================================================
 
   // function dropHandler(ev) {
@@ -113,13 +118,13 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
       // onDrop={dropHandler}
       onClick={handleClick}
       title={self.displayName}
-      ref={r}
+      ref={virtualisedRowRef}
       style={{
         ...style,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: getBackgroundColour(isSelected, isActive)
+        backgroundColor: getBackgroundColour(isActive, isSelected)
       }}
     >
       <div
@@ -130,7 +135,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
           // opacity: isDragging ? 0.4 : 1
         }}
       >
-        <VirtualisedRowIcon self={self} />
+        <VirtualisedRowIcon type={self.type} fullPath={self.fullPath} />
         <VirtualisedRowDisplayName displayName={self.displayName} isActive={isActive} />
       </div>
 
@@ -139,7 +144,7 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
   );
 }
 
-function getBackgroundColour(isSelected: boolean, isActive: boolean): CSS.Property.BackgroundColor {
+function getBackgroundColour(isActive: boolean, isSelected: boolean): CSS.Property.BackgroundColor {
   if (isActive) {
     return "#0068d9";
   }
