@@ -24,6 +24,11 @@ const THUMBNAIL_UTILITIES_EXE_PATH = is.dev
       "../external/ThumbnailUtilities/minified-release/ThumbnailUtilities.exe"
     );
 
+const DEFAULT_QUICK_LOOK_EXE_PATH = path.win32.join(
+  USERPROFILE,
+  "\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+);
+
 let MAIN_WINDOW: BrowserWindow;
 
 function createWindow(): void {
@@ -138,14 +143,9 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, fullPath: string) => {
     return;
   }
 
-  const default_quickLookExePath = path.win32.join(
-    USERPROFILE,
-    "\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
-  );
-
-  if (await doesFileExist(default_quickLookExePath)) {
-    SETTINGS.set("quickLookExePath", default_quickLookExePath);
-    cmd.exec(`"${default_quickLookExePath}" "${fullPath}"`);
+  if (await doesFileExist(DEFAULT_QUICK_LOOK_EXE_PATH)) {
+    SETTINGS.set("quickLookExePath", DEFAULT_QUICK_LOOK_EXE_PATH);
+    cmd.exec(`"${DEFAULT_QUICK_LOOK_EXE_PATH}" "${fullPath}"`);
     return;
   }
 
@@ -168,9 +168,9 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, fullPath: string) => {
     return;
   }
 
-  const user_quickLookExePath = filePaths[0];
-  SETTINGS.set("quickLookExePath", user_quickLookExePath);
-  cmd.exec(`"${user_quickLookExePath}" "${fullPath}"`);
+  const userQuickLookExePath = filePaths[0];
+  SETTINGS.set("quickLookExePath", userQuickLookExePath);
+  cmd.exec(`"${userQuickLookExePath}" "${fullPath}"`);
 });
 
 ipcMain.handle("GET_STARTING_DIRECTORY", async (event) => {
@@ -185,34 +185,47 @@ ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, folderPath) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
   await assertTrueAsync(() => {
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       fswin.getAttributes(folderPath, (result) => {
         if (result?.IS_DIRECTORY) {
           resolve(true);
+        } else {
+          // resolve false to throw an AssertionError
+          resolve(false);
         }
-
-        resolve(false);
       });
     });
   });
 
   const folderPathWithTrailingWildcard = path.win32.join(folderPath, WILDCARD);
 
-  return new Promise((resolve, reject) => {
-    fswin.find(folderPathWithTrailingWildcard, (files) => {
+  const fsWinDirectoryContents = await new Promise<fswin.Find.File[]>((resolve, reject) => {
+    const isQueuedSuccessfully = fswin.find(folderPathWithTrailingWildcard, (files) => {
       resolve(files);
     });
+
+    if (!isQueuedSuccessfully) {
+      reject();
+    }
   });
+
+  return fsWinDirectoryContents;
 });
 
 ipcMain.handle("GET_LIST_OF_DRIVES", async (event) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  return new Promise<fswin.LogicalDriveList>((resolve, reject) => {
-    fswin.getLogicalDriveList((result) => {
+  const listOfDrives = await new Promise<fswin.LogicalDriveList>((resolve, reject) => {
+    const status = fswin.getLogicalDriveList((result) => {
       resolve(result);
     });
+
+    if (!status) {
+      reject();
+    }
   });
+
+  return listOfDrives;
 });
 
 ipcMain.handle("GET_SMALL_ICON", async (event, filePath: string): Promise<string> => {
