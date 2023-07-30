@@ -116,26 +116,25 @@ app.on("window-all-closed", () => {
 
 const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
 
-ipcMain.on("QUIT_APP", (event, arg) => {
+ipcMain.on("QUIT_APP", (event) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
   app.quit();
 });
 
-ipcMain.on("OPEN_FILE_EXPLORER", (event, arg) => {
+ipcMain.on("OPEN_FILE_EXPLORER", (event, folderPath: string) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const fullPath = arg;
-  cmd.exec(`explorer.exe "${fullPath}"`);
+  cmd.exec(`explorer.exe "${folderPath}"`);
 });
 
-ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
+ipcMain.on("RUN_QUICK_LOOK", async (event, fullPath: string) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
   // use the `QuickLook.exe` that the user provided (if possible)
   if (SETTINGS.exists("quickLookExePath")) {
     const quickLookExePath = SETTINGS.get("quickLookExePath");
-    cmd.exec(`"${quickLookExePath}" "${arg}"`);
+    cmd.exec(`"${quickLookExePath}" "${fullPath}"`);
     return;
   }
 
@@ -146,7 +145,7 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
 
   if (await doesFileExist(default_quickLookExePath)) {
     SETTINGS.set("quickLookExePath", default_quickLookExePath);
-    cmd.exec(`"${default_quickLookExePath}" "${arg}"`);
+    cmd.exec(`"${default_quickLookExePath}" "${fullPath}"`);
     return;
   }
 
@@ -171,10 +170,10 @@ ipcMain.on("RUN_QUICK_LOOK", async (event, arg) => {
 
   const user_quickLookExePath = filePaths[0];
   SETTINGS.set("quickLookExePath", user_quickLookExePath);
-  cmd.exec(`"${user_quickLookExePath}" "${arg}"`);
+  cmd.exec(`"${user_quickLookExePath}" "${fullPath}"`);
 });
 
-ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
+ipcMain.handle("GET_STARTING_DIRECTORY", async (event) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
   // TODO: check settings
@@ -182,10 +181,8 @@ ipcMain.handle("GET_STARTING_DIRECTORY", async (event, arg) => {
   return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
 });
 
-ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
+ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, folderPath) => {
   assertTrue(() => senderIsValid(event.senderFrame));
-
-  const folderPath = arg;
 
   await assertTrueAsync(() => {
     return new Promise((resolve, reject) => {
@@ -208,7 +205,7 @@ ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, arg) => {
   });
 });
 
-ipcMain.handle("GET_LIST_OF_DRIVES", async (event, arg) => {
+ipcMain.handle("GET_LIST_OF_DRIVES", async (event) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
   return new Promise<fswin.LogicalDriveList>((resolve, reject) => {
@@ -255,17 +252,15 @@ ipcMain.handle("GET_LARGE_ICON", async (event, filePath: string): Promise<string
   return data;
 });
 
-ipcMain.handle("DOES_FILE_EXIST", async (event, arg) => {
+ipcMain.handle("DOES_FILE_EXIST", async (event, fullPath) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const fullPath = arg;
   return await doesFileExist(fullPath);
 });
 
-ipcMain.handle("CREATE_NEW_FOLDER", async (event, arg) => {
+ipcMain.handle("CREATE_NEW_FOLDER", async (event, folderPath) => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const folderPath = arg;
   await fs.promises.mkdir(folderPath);
 });
 
