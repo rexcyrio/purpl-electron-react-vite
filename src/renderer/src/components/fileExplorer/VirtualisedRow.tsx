@@ -1,14 +1,12 @@
 import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
 import { navigateTo } from "@renderer/store/slices/fileExplorerItemsSlice";
-import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
-import { getFileExplorerItem } from "@renderer/utilities/getFileExplorerItem";
-import { getSelectedFileExplorerItemInColumnIfAny } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
 import type * as CSS from "csstype";
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useRef } from "react";
 import MemoArrowRight from "../icons/MemoArrowRight";
 import VirtualisedRowDisplayName from "./VirtualisedRowDisplayName";
 import VirtualisedRowIcon from "./VirtualisedRowIcon";
+import { selectActiveFileExplorerItemIfAny, selectFileExplorerItem, selectSelectedFileExplorerItemInColumnIfAny } from "@renderer/store/selectors/selectFileExplorerItem";
 
 VirtualisedRow.propTypes = {
   data: PropTypes.number.isRequired,
@@ -20,12 +18,12 @@ function VirtualisedRow({ data: columnIndex, index: rowIndex, style }): JSX.Elem
   const dispatch = useAppDispatch();
   const virtualisedRowRef = useRef<HTMLDivElement | null>(null);
 
-  const self = useAppSelector((state) => getFileExplorerItem(state, columnIndex, rowIndex));
+  const self = useAppSelector((state) => selectFileExplorerItem(state, columnIndex, rowIndex));
 
-  const isActive = useAppSelector((state) => self === getActiveFileExplorerItemIfAny(state));
+  const isActive = useAppSelector((state) => self === selectActiveFileExplorerItemIfAny(state));
 
   const isSelected = useAppSelector(
-    (state) => self === getSelectedFileExplorerItemInColumnIfAny(state, columnIndex)
+    (state) => self === selectSelectedFileExplorerItemInColumnIfAny(state, columnIndex)
   );
 
   const handleDragStart = useCallback(

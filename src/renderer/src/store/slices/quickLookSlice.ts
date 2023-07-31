@@ -1,10 +1,7 @@
 import { AnyAction, PayloadAction, ThunkAction, createSlice } from "@reduxjs/toolkit";
 import { AssertionError, assertTrue } from "@renderer/utilities/assertion";
-import {
-  getActiveFileExplorerItem,
-  getActiveFileExplorerItemIfAny
-} from "@renderer/utilities/getActiveFileExplorerItem";
 import { RootState } from "../store";
+import { selectActiveFileExplorerItem, selectActiveFileExplorerItemIfAny } from "../selectors/selectFileExplorerItem";
 
 export interface QuickLookState {
   isOpen: boolean;
@@ -66,7 +63,7 @@ function _closeQuickLookUsing(
     dispatch(_resetFullPath());
 
     if (fullPathType === "currentFullPath") {
-      const activeFileExplorerItem = getActiveFileExplorerItem(state);
+      const activeFileExplorerItem = selectActiveFileExplorerItem(state);
       const fullPath = activeFileExplorerItem.fullPath;
       window.api.runQuickLook(fullPath);
     } else if (fullPathType === "oldFullPath") {
@@ -87,7 +84,7 @@ export function toggleQuickLook(): ThunkAction<void, RootState, unknown, AnyActi
       return;
     }
 
-    const activeFileExplorerItem = getActiveFileExplorerItemIfAny(state);
+    const activeFileExplorerItem = selectActiveFileExplorerItemIfAny(state);
 
     if (activeFileExplorerItem === null) {
       return;
@@ -103,7 +100,7 @@ export function updateQuickLookIfNeeded(): ThunkAction<void, RootState, unknown,
     const state = getState();
 
     if (state.quickLook.isOpen) {
-      const activeFileExplorerItem = getActiveFileExplorerItemIfAny(state);
+      const activeFileExplorerItem = selectActiveFileExplorerItemIfAny(state);
 
       if (activeFileExplorerItem === null) {
         dispatch(_closeQuickLookUsing("oldFullPath"));

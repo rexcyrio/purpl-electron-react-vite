@@ -8,15 +8,15 @@ import {
   SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS,
   SPECIAL_FILE_EXPLORER_ITEM_LOADING
 } from "../../utilities/common";
-import { getColumn } from "../../utilities/getColumn";
-import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "../../utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
-import { getRowIndexElseNegativeOne } from "../../utilities/getRowIndex";
 import ColumnBlank from "./ColumnBlank";
 import ColumnEmptyFolder from "./ColumnEmptyFolder";
 import ColumnFileInfo from "./ColumnFileInfo";
 import ColumnLoading from "./ColumnLoading";
 import VirtualisedRow from "./VirtualisedRow";
 import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
+import { selectColumn } from "@renderer/store/selectors/selectColumn";
+import { selectActiveColumnIndex } from "@renderer/store/selectors/selectColumnIndex";
+import { selectRowIndexElseNegativeOne } from "@renderer/store/selectors/selectRowIndex";
 
 const rem = 16;
 const VIRTUALISED_ROW_PADDING = 5;
@@ -28,15 +28,12 @@ VirtualisedColumn.propTypes = {
 function VirtualisedColumn({ columnIndex }): JSX.Element {
   const fixedSizeListRef = useRef<FixedSizeList | null>(null);
 
-  const column = useAppSelector((state) => getColumn(state, columnIndex));
+  const column = useAppSelector((state) => selectColumn(state, columnIndex));
 
-  const activeColumnIndex = useAppSelector((state) => {
-    const [columnIndex, rowIndex] = getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
-    return columnIndex;
-  });
+  const activeColumnIndex = useAppSelector(selectActiveColumnIndex);
 
   const selectedRowIndex = useAppSelector((state) =>
-    getRowIndexElseNegativeOne(state, columnIndex)
+    selectRowIndexElseNegativeOne(state, columnIndex)
   );
 
   const scrollSelectedItemIntoView = useCallback(() => {

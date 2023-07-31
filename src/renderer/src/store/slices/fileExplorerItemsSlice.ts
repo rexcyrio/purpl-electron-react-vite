@@ -12,22 +12,11 @@ import {
   SPECIAL_FILE_EXPLORER_ITEM_LOADING,
   WINDOWS_PATH_SEPARATOR
 } from "@renderer/utilities/common";
-import {
-  getActiveFileExplorerItem
-} from "@renderer/utilities/getActiveFileExplorerItem";
 import { getArrayIndexOfFirstDifferentElement } from "@renderer/utilities/getArrayIndexOfFirstDifferentElement";
-import { getColumn } from "@renderer/utilities/getColumn";
-import { getColumnIndexAndRowIndexOfActiveFileExplorerItem } from "@renderer/utilities/getColumnIndexAndRowIndexOfActiveFileExplorerItem";
 import { getDisplayName } from "@renderer/utilities/getDisplayName";
-import {
-  getFileExplorerItem
-} from "@renderer/utilities/getFileExplorerItem";
 import { getIncrementalFullPaths } from "@renderer/utilities/getIncrementalFullPaths";
-import { getLastColumn } from "@renderer/utilities/getLastColumn";
 import { getListOfDrives } from "@renderer/utilities/getListOfDrives";
 import { getPathComponents } from "@renderer/utilities/getPathComponents";
-import { getPreviewColumn } from "@renderer/utilities/getPreviewColumn";
-import { getSelectedFileExplorerItemInColumn } from "@renderer/utilities/getSelectedFileExplorerItemInColumn";
 import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
 import { removeTrailingPathSeparatorIfNeeded } from "@renderer/utilities/removeTrailingPathSeparatorIfNeeded";
 import { replaceBasename } from "@renderer/utilities/replaceBasename";
@@ -35,6 +24,9 @@ import { sortColumnByFolderFirst } from "@renderer/utilities/sortColumnByFolderF
 import { RootState } from "../store";
 import { openErrorSnackbarWithAlertText } from "./errorSnackbarSlice";
 import { setIsReady } from "./isReadySlice";
+import { selectActiveColumn, selectColumn, selectPreviewColumn } from "../selectors/selectColumn";
+import { selectActiveColumnIndexAndActiveRowIndex } from "../selectors/selectActiveColumnIndexAndActiveRowIndex";
+import { selectActiveFileExplorerItem, selectFileExplorerItem, selectSelectedFileExplorerItemInColumn } from "../selectors/selectFileExplorerItem";
 
 export interface FileExplorerItemsState {
   columns: FileExplorerItem[][];
@@ -198,7 +190,7 @@ export function initReduxStore(): ThunkAction<Promise<void>, RootState, unknown,
 export function upArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const [columnIndex, rowIndex] = getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+    const [columnIndex, rowIndex] = selectActiveColumnIndexAndActiveRowIndex(state);
 
     if (rowIndex === 0 || rowIndex === -1) {
       return;
@@ -212,8 +204,8 @@ export function upArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAct
 export function downArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const [columnIndex, rowIndex] = getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
-    const column = getColumn(state, columnIndex);
+    const [columnIndex, rowIndex] = selectActiveColumnIndexAndActiveRowIndex(state);
+    const column = selectColumn(state, columnIndex);
 
     if (rowIndex === column.length - 1 || rowIndex === -1) {
       return;
@@ -232,10 +224,9 @@ export function leftArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyA
       return;
     }
 
-    const [activeColumnIndex, activeRowIndex] =
-      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+    const [activeColumnIndex, activeRowIndex] = selectActiveColumnIndexAndActiveRowIndex(state);
 
-    const column = getColumn(state, activeColumnIndex);
+    const column = selectColumn(state, activeColumnIndex);
 
     if (column.length === 0) {
       dispatch(_removeLastIndex());
@@ -249,14 +240,13 @@ export function leftArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyA
 export function rightArrow(): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const [activeColumnIndex, activeRowIndex] =
-      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+    const [activeColumnIndex, activeRowIndex] = selectActiveColumnIndexAndActiveRowIndex(state);
 
     if (activeRowIndex === -1) {
       return;
     }
 
-    const nextColumn = getColumn(state, activeColumnIndex + 1);
+    const nextColumn = selectColumn(state, activeColumnIndex + 1);
 
     if (nextColumn.length === 0) {
       dispatch(_addIndex(-1));
@@ -306,7 +296,7 @@ export function createPreviewColumn(): ThunkAction<
 > {
   return async function thunk(dispatch, getState): Promise<FileExplorerItem[]> {
     const state = getState();
-    const activeFileExplorerItem = getActiveFileExplorerItem(state);
+    const activeFileExplorerItem = selectActiveFileExplorerItem(state);
 
     if (activeFileExplorerItem.type === "file") {
       return [SPECIAL_FILE_EXPLORER_ITEM_FILE_DETAILS];
@@ -339,7 +329,7 @@ export function addPreviewColumn(): ThunkAction<Promise<void>, RootState, unknow
 
     // check that the column we are replacing is *actually* the old `loadingColumn`
     const state = getState();
-    const columnToBeReplaced = getPreviewColumn(state);
+    const columnToBeReplaced = selectPreviewColumn(state);
 
     if (columnToBeReplaced === loadingColumn) {
       dispatch(_updatePreviewColumn(newPreviewColumn));
@@ -356,7 +346,7 @@ export function updatePreviewColumn(): ThunkAction<Promise<void>, RootState, unk
 
     // check that the column we are replacing is *actually* the old `loadingColumn`
     const state = getState();
-    const columnToBeReplaced = getPreviewColumn(state);
+    const columnToBeReplaced = selectPreviewColumn(state);
 
     if (columnToBeReplaced === loadingColumn) {
       dispatch(_updatePreviewColumn(newPreviewColumn));
@@ -426,8 +416,7 @@ export function navigateTo(
 ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const [activeColumnIndex, activeRowIndex] =
-      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+    const [activeColumnIndex, activeRowIndex] = selectActiveColumnIndexAndActiveRowIndex(state);
 
     assertTrue(() => {
       const numColumns = state.fileExplorerItems.columns.length;
@@ -483,7 +472,7 @@ export function navigateToFullPath(
 
     const targetPathComponents = getPathComponents(fullPath);
 
-    const activeFileExplorerItem = getActiveFileExplorerItem(getState());
+    const activeFileExplorerItem = selectActiveFileExplorerItem(getState());
     const currentPathComponents = getPathComponents(activeFileExplorerItem.fullPath);
 
     const indexOfFirstDifferentPathComponent = getArrayIndexOfFirstDifferentElement(
@@ -525,7 +514,7 @@ export function navigateToFullPath(
       dispatch(_addIndex(index));
 
       // adding the columns
-      const fileExplorerItem = getFileExplorerItem(getState(), i, index);
+      const fileExplorerItem = selectFileExplorerItem(getState(), i, index);
 
       const newColumn =
         fileExplorerItem.type === "file"
@@ -546,9 +535,9 @@ export function isDuplicateName(
 ): ThunkAction<Promise<boolean>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<boolean> {
     const state = getState();
-    const lastColumn = getLastColumn(state);
+    const activeColumn = selectActiveColumn(state);
 
-    for (const fileExplorerItem of lastColumn) {
+    for (const fileExplorerItem of activeColumn) {
       if (fileExplorerItem.displayName === newFolderName) {
         return false;
       }
@@ -563,7 +552,7 @@ export function createNewFolder(
 ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> {
   return async function thunk(dispatch, getState): Promise<void> {
     const state = getState();
-    const activeFileExplorerItem = getActiveFileExplorerItem(state);
+    const activeFileExplorerItem = selectActiveFileExplorerItem(state);
     const fullPath = activeFileExplorerItem.fullPath;
     const folderPath = replaceBasename(fullPath, newFolderName);
     window.api.createNewFolder(folderPath);
@@ -575,12 +564,12 @@ export function openFileExplorer(): ThunkAction<Promise<void>, RootState, unknow
     const state = getState();
 
     const [activeColumnIndex, activeRowIndex] =
-      getColumnIndexAndRowIndexOfActiveFileExplorerItem(state);
+      selectActiveColumnIndexAndActiveRowIndex(state);
 
     if (activeColumnIndex === 0) {
       window.api.openFileExplorer("");
     } else {
-      const parentFolder = getSelectedFileExplorerItemInColumn(state, activeColumnIndex - 1);
+      const parentFolder = selectSelectedFileExplorerItemInColumn(state, activeColumnIndex - 1);
       window.api.openFileExplorer(parentFolder.fullPath);
     }
   };

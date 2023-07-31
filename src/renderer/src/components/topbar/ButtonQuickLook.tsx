@@ -8,14 +8,14 @@ import {
   toggleQuickLook,
   updateQuickLookIfNeeded
 } from "@renderer/store/slices/quickLookSlice";
-import { getActiveFileExplorerItemIfAny } from "@renderer/utilities/getActiveFileExplorerItem";
 import React, { useCallback, useEffect, useMemo } from "react";
 import ButtonWrapper from "./ButtonWrapper";
+import { selectActiveFileExplorerItemIfAny } from "@renderer/store/selectors/selectFileExplorerItem";
 
 function ButtonQuickLook(): JSX.Element {
   const dispatch = useAppDispatch();
   const isQuickLookOpen = useAppSelector((state) => state.quickLook.isOpen);
-  const activeFileExplorerItem = useAppSelector((state) => getActiveFileExplorerItemIfAny(state));
+  const activeFileExplorerItem = useAppSelector(selectActiveFileExplorerItemIfAny);
 
   useEffect(() => {
     dispatch(updateQuickLookIfNeeded());

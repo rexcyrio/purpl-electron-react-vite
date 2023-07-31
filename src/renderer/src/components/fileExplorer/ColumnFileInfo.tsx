@@ -1,10 +1,10 @@
-import React from "react";
 import { useAppSelector } from "@renderer/store/hooks";
+import { selectActiveFileExplorerItem } from "@renderer/store/selectors/selectFileExplorerItem";
+import React from "react";
 import MemoFileIcon from "../icons/MemoFileIcon";
-import { getActiveFileExplorerItem } from "@renderer/utilities/getActiveFileExplorerItem";
 
 function ColumnFileInfo(): JSX.Element {
-  const self = useAppSelector((state) => getActiveFileExplorerItem(state));
+  const self = useAppSelector(selectActiveFileExplorerItem);
 
   return (
     <div

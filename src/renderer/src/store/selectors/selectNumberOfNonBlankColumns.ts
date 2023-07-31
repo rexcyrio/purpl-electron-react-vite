@@ -1,8 +1,8 @@
-import { RootState } from "@renderer/store";
-import { SPECIAL_FILE_EXPLORER_ITEM_BLANK } from "./common";
-import { isFirstFileExplorerItemInColumnEqualTo } from "./isFirstFileExplorerItemInColumnEqualTo";
+import { isFirstFileExplorerItemInColumnEqualTo } from "@renderer/utilities/isFirstFileExplorerItemInColumnEqualTo";
+import { RootState } from "..";
+import { SPECIAL_FILE_EXPLORER_ITEM_BLANK } from "@renderer/utilities/common";
 
-export function getNumberOfNonBlankColumns(state: RootState): number {
+export function selectNumberOfNonBlankColumns(state: RootState): number {
   const columns = state.fileExplorerItems.columns;
 
   const nonBlankColumns = columns.filter((column) => {
