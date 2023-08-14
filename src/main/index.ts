@@ -1,3 +1,5 @@
+const winthumbnail = require("../../../winthumbnail/dist/binding");
+
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import cmd from "child_process";
 import { BrowserWindow, app, dialog, ipcMain, nativeImage, shell } from "electron";
@@ -14,16 +16,6 @@ import { senderIsValid } from "./senderIsValid";
 
 const USERPROFILE = os.homedir();
 const WILDCARD = "*";
-
-const THUMBNAIL_UTILITIES_EXE_PATH = is.dev
-  ? path.win32.join(
-      __dirname,
-      "../../external/ThumbnailUtilities/minified-release/ThumbnailUtilities.exe"
-    )
-  : path.win32.join(
-      __dirname,
-      "../external/ThumbnailUtilities/minified-release/ThumbnailUtilities.exe"
-    );
 
 const DEFAULT_QUICK_LOOK_EXE_PATH = path.win32.join(
   USERPROFILE,
@@ -269,30 +261,8 @@ ipcMain.handle("GET_SMALL_ICON", async (event, filePath: string): Promise<string
 ipcMain.handle("GET_LARGE_ICON", async (event, filePath: string): Promise<string> => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const data = await new Promise<string>((resolve, reject) => {
-    const externalChildProcess = cmd.spawn(THUMBNAIL_UTILITIES_EXE_PATH, [filePath, "160"]);
-
-    const bufferArray: Buffer[] = [];
-
-    externalChildProcess.stdout.on("data", (buffer: Buffer) => {
-      bufferArray.push(buffer);
-    });
-
-    externalChildProcess.stdout.on("close", (code: number, signal: string) => {
-      const dataUrlComponents = bufferArray.map((buffer) => buffer.toString("utf8"));
-      const dataUrl = dataUrlComponents.join("");
-      resolve(dataUrl);
-    });
-
-    externalChildProcess.stderr.on("data", async (buffer: Buffer) => {
-      // fallback to Electron's `getFileIcon` when ThumbnailUtilities throws an error
-      const icon = await app.getFileIcon(filePath, { size: "normal" });
-      const dataUrl = icon.toDataURL();
-      resolve(dataUrl);
-    });
-  });
-
-  return data;
+  const dataUrl = winthumbnail.create(filePath, 160);
+  return dataUrl;
 });
 
 ipcMain.handle("DOES_FILE_EXIST", async (event, fullPath) => {
