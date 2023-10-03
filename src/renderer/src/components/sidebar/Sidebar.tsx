@@ -22,7 +22,7 @@ function Sidebar(): JSX.Element {
           <SidebarRow fullPath="C:\Users\Stefan Lee\Videos" />
           <SidebarRow fullPath="C:\Users\Stefan Lee\abc" />
           <SidebarRow fullPath="C:\Users\Stefan Lee\one two three four five six seven eight nine ten" />
-          <SidebarRow fullPath="C:\Users\Stefan Lee\Documents\Development\purpl-electron-react-vite-2\node_modules\@ampproject\remapping\dist\types\types.d.ts" />
+          <SidebarRow fullPath="C:\Users\Stefan Lee\Documents\Development\purpl-electron-react-vite\node_modules\@ampproject\remapping\dist\types\types.d.ts" />
         </SidebarSection>
 
         <SidebarSection headerName="Drives">

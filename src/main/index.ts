@@ -200,7 +200,7 @@ ipcMain.handle("GET_STARTING_DIRECTORY", async (event) => {
 
   // TODO: check settings
   // return __dirname;
-  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite-2";
+  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite";
 });
 
 ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, folderPath) => {
