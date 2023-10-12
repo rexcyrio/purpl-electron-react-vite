@@ -1,4 +1,4 @@
-const winthumbnail = require("../../../winthumbnail/dist/binding");
+const winThumbnail = require("../../../win-thumbnail/dist/binding");
 
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import cmd from "child_process";
@@ -261,7 +261,7 @@ ipcMain.handle("GET_SMALL_ICON", async (event, filePath: string): Promise<string
 ipcMain.handle("GET_LARGE_ICON", async (event, filePath: string): Promise<string> => {
   assertTrue(() => senderIsValid(event.senderFrame));
 
-  const dataUrl = winthumbnail.create(filePath, 160);
+  const dataUrl = winThumbnail.create(filePath, 160);
   return dataUrl;
 });
 
