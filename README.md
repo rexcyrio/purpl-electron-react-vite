@@ -1,6 +1,19 @@
-# purpl-electron-react-vite
+# purpl-electron-react-vite \[WIP\]
 
-An Electron application with React and TypeScript
+A Windows File Explorer application built using Electron that was inspired by macOS Finder's column view.
+
+![Screenshot of Purpl](purpl.png)
+
+## Features
+
+- File Explorer with column view
+- Arrow key navigation
+  - ↑ / ↓ : select item
+  - ← : navigate up to parent folder
+  - → : navigate into folder (if selected item is a folder)
+- Integration with [QuickLook](https://github.com/QL-Win/QuickLook)
+  - Press `space` to toggle
+- Generate thumbnails / file icons using native Windows APIs via my other Nodejs addon [`win-thumbnail`](https://github.com/rexcyrio/win-thumbnail)
 
 ## Recommended IDE Setup
 
@@ -11,13 +24,13 @@ An Electron application with React and TypeScript
 ### Install
 
 ```bash
-$ npm install
+npm install
 ```
 
 ### Development
 
 ```bash
-$ npm run dev
+npm run dev
 ```
 
 ### Build
@@ -32,3 +45,7 @@ $ npm run build:mac
 # For Linux
 $ npm run build:linux
 ```
+
+## Acknowledgements
+
+Project template referenced from [https://github.com/alex8088/quick-start/tree/master/packages/create-electron/playground/react-ts](https://github.com/alex8088/quick-start/tree/master/packages/create-electron/playground/react-ts)
