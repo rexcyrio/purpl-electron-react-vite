@@ -1,1 +1,4 @@
 * text=auto eol=lf
+sidecar/**/dotnet-tools.json text eol=crlf
+sidecar/**/*.csproj text eol=crlf
+sidecar/**/*.slnx text eol=crlf
