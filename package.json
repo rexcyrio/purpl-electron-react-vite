@@ -26,7 +26,8 @@
     "filesize": "^11.0.29",
     "fswin": "^3.25.1108",
     "jimp": "^1.6.1",
-    "typeface-roboto": "^1.1.13"
+    "typeface-roboto": "^1.1.13",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^2.0.0",
