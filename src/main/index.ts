@@ -1,30 +1,19 @@
-const winThumbnail = require("../../../win-thumbnail/dist/binding");
-
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import cmd from "child_process";
-import { BrowserWindow, app, dialog, ipcMain, nativeImage, shell } from "electron";
-import fs from "fs";
-import fswin from "fswin";
-import Jimp from "jimp";
-import os from "os";
+import { BrowserWindow, app, ipcMain, nativeImage, shell } from "electron";
+import { Jimp } from "jimp";
 import path from "path";
 import icon from "../../resources/icon.png?asset";
-import { JSONFileWrapper } from "./JSONFileWrapper";
-import { assertTrue, assertTrueAsync } from "./assertion";
-import { doesFileExist } from "./doesFileExist";
-import { senderIsValid } from "./senderIsValid";
+import { assertTrue } from "./assertions/assertions";
+import FileExplorerController from "./controllers/fileExplorer.controller";
+import FsWinController from "./controllers/fsWin.controller";
+import IconsController from "./controllers/icons.controller";
+import IRegisterHandles from "./controllers/IRegisterHandles";
+import QuickLookController from "./controllers/quickLook.controller";
+import SystemController from "./controllers/system.controller";
 
-const USERPROFILE = os.homedir();
-const WILDCARD = "*";
+export let MAIN_WINDOW: BrowserWindow;
 
-const DEFAULT_QUICK_LOOK_EXE_PATH = path.win32.join(
-  USERPROFILE,
-  "\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
-);
-
-let MAIN_WINDOW: BrowserWindow;
-
-function createWindow(): void {
+function createMainWindow() {
   // Create the browser window.
   MAIN_WINDOW = new BrowserWindow({
     width: 900,
@@ -33,7 +22,12 @@ function createWindow(): void {
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
-      preload: path.join(__dirname, "../preload/index.js")
+      preload: path.join(__dirname, "../preload/index.js"),
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      nodeIntegrationInWorker: false,
+      nodeIntegrationInSubFrames: false
     }
   });
 
@@ -50,31 +44,37 @@ function createWindow(): void {
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     MAIN_WINDOW.loadURL(process.env["ELECTRON_RENDERER_URL"]);
-    installDevExtensions();
+    installDeveloperExtensions();
   } else {
     MAIN_WINDOW.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 }
 
-async function installDevExtensions(): Promise<void> {
+async function installDeveloperExtensions() {
   const electronDevToolsExtension = await import("electron-devtools-installer");
 
   const installExtension = electronDevToolsExtension.default;
   const { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = electronDevToolsExtension;
 
-  Promise.resolve()
-    .then(() => installExtension(REACT_DEVELOPER_TOOLS))
-    .then(() => installExtension(REDUX_DEVTOOLS))
-    .then(() => {
-      // MAIN_WINDOW.webContents.openDevTools({ mode: "detach" });
-      MAIN_WINDOW.webContents.openDevTools();
-    })
-    .then(() => {
-      console.log("=====\n[EXTENSIONS] installed successfully\n=====\n");
-    })
-    .catch((error: any) => {
-      console.log(`=====\n[EXTENSIONS] an error occurred :: ${error}\n=====\n`);
-    });
+  try {
+    await sleep(1);
+
+    installExtension(REACT_DEVELOPER_TOOLS);
+    installExtension(REDUX_DEVTOOLS);
+    MAIN_WINDOW.webContents.openDevTools();
+
+    console.log("\n*** Developer extensions installed successfully ***\n");
+  } catch (error) {
+    console.error(`\n*** Developer extensions failed to install due to: ***\n`, error);
+  }
+}
+
+async function sleep(ms: number) {
+  return new Promise<void>((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
 }
 
 // This method will be called when Electron has finished
@@ -91,12 +91,12 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  createWindow();
+  createMainWindow();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 });
 
@@ -109,65 +109,29 @@ app.on("window-all-closed", () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+function registerControllerHandles() {
+  const controllers: IRegisterHandles[] = [
+    new FileExplorerController(),
+    new FsWinController(),
+    new IconsController(),
+    new QuickLookController(),
+    new SystemController()
+  ];
 
-const SETTINGS = new JSONFileWrapper(path.win32.join(__dirname, "settings.json"));
-
-ipcMain.on("QUIT_APP", (event) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  app.quit();
-});
-
-ipcMain.on("OPEN_FILE_EXPLORER", (event, folderPath: string) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  cmd.exec(`explorer.exe "${folderPath}"`);
-});
-
-ipcMain.on("RUN_QUICK_LOOK", async (event, fullPath: string) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  // use the `QuickLook.exe` that the user provided (if possible)
-  if (SETTINGS.exists("quickLookExePath")) {
-    const quickLookExePath = SETTINGS.get("quickLookExePath");
-    cmd.exec(`"${quickLookExePath}" "${fullPath}"`);
-    return;
+  for (const controller of controllers) {
+    controller.registerHandles();
   }
+}
 
-  if (await doesFileExist(DEFAULT_QUICK_LOOK_EXE_PATH)) {
-    SETTINGS.set("quickLookExePath", DEFAULT_QUICK_LOOK_EXE_PATH);
-    cmd.exec(`"${DEFAULT_QUICK_LOOK_EXE_PATH}" "${fullPath}"`);
-    return;
-  }
+function bootstrap() {
+  registerControllerHandles();
+}
 
-  await dialog.showMessageBox(MAIN_WINDOW, {
-    message: "QuickLook.exe was not found at its default install location.",
-    detail: "Please navigate to QuickLook.exe in the following window.",
-    type: "info"
-  });
+bootstrap();
 
-  const { canceled, filePaths } = await dialog.showOpenDialog(MAIN_WINDOW, {
-    defaultPath: USERPROFILE,
-    filters: [
-      { name: "Executable", extensions: ["exe"] },
-      { name: "All Files", extensions: ["*"] }
-    ],
-    properties: ["openFile", "dontAddToRecent"]
-  });
-
-  if (canceled) {
-    return;
-  }
-
-  const userQuickLookExePath = filePaths[0];
-  SETTINGS.set("quickLookExePath", userQuickLookExePath);
-  cmd.exec(`"${userQuickLookExePath}" "${fullPath}"`);
-});
-
+// TODO:
 ipcMain.on("START_DRAG", async (event, fullPath: string) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
+  assertTrue(senderIsValid(event.senderFrame));
 
   const displayName = fullPath.split(path.win32.sep).at(-1);
 
@@ -193,100 +157,4 @@ ipcMain.on("START_DRAG", async (event, fullPath: string) => {
       icon: myNativeImage
     });
   });
-});
-
-ipcMain.handle("GET_STARTING_DIRECTORY", async (event) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  // TODO: check settings
-  // return __dirname;
-  return "C:\\Users\\Stefan Lee\\Documents\\Development\\purpl-electron-react-vite";
-});
-
-ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", async (event, folderPath) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  await assertTrueAsync(() => {
-    return new Promise<boolean>((resolve, reject) => {
-      fswin.getAttributes(folderPath, (result) => {
-        if (result?.IS_DIRECTORY) {
-          resolve(true);
-        } else {
-          // resolve false to throw an AssertionError
-          resolve(false);
-        }
-      });
-    });
-  });
-
-  const folderPathWithTrailingWildcard = path.win32.join(folderPath, WILDCARD);
-
-  const fsWinDirectoryContents = await new Promise<fswin.Find.File[]>((resolve, reject) => {
-    const isQueuedSuccessfully = fswin.find(folderPathWithTrailingWildcard, (files) => {
-      resolve(files);
-    });
-
-    if (!isQueuedSuccessfully) {
-      reject();
-    }
-  });
-
-  return fsWinDirectoryContents;
-});
-
-ipcMain.handle("GET_LIST_OF_DRIVES", async (event) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  const listOfDrives = await new Promise<fswin.LogicalDriveList>((resolve, reject) => {
-    const status = fswin.getLogicalDriveList((result) => {
-      resolve(result);
-    });
-
-    if (!status) {
-      reject();
-    }
-  });
-
-  return listOfDrives;
-});
-
-ipcMain.handle("GET_SMALL_ICON", async (event, filePath: string): Promise<string> => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  const icon = await app.getFileIcon(filePath, { size: "normal" });
-  const dataUrl = icon.toDataURL();
-  return dataUrl;
-});
-
-ipcMain.handle("GET_LARGE_ICON", async (event, filePath: string): Promise<string> => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  const dataUrl = winThumbnail.create(filePath, 160);
-  return dataUrl;
-});
-
-ipcMain.handle("DOES_FILE_EXIST", async (event, fullPath) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  return await doesFileExist(fullPath);
-});
-
-ipcMain.handle("CREATE_NEW_FOLDER", async (event, folderPath) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  await fs.promises.mkdir(folderPath);
-});
-
-// ============================================================================
-// unused
-// ============================================================================
-
-ipcMain.handle("MOVE_ITEM", async (event, arg) => {
-  assertTrue(() => senderIsValid(event.senderFrame));
-
-  const { from_fullPath, to_fullPath } = arg;
-  // TODO: remove
-  throw new Error(Date.now().toString());
-
-  await fs.promises.rename(from_fullPath, to_fullPath);
 });
