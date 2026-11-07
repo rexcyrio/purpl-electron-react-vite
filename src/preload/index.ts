@@ -1,43 +1,46 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type fswin from "fswin";
 
-// invoke   = asynchronous +    response
-// send     = asynchronous + NO response
-// sendSync =  synchronous +    response
+interface HttpLikeResponse<T> {
+  status: number;
+  message: string;
+  data: T;
+}
 
-// Custom APIs for renderer
+// NOTE: invoke() = asynchronous + response
+
 export const api = {
-  quitApp: (): void => {
-    ipcRenderer.send("QUIT_APP");
+  quitApp: async (): Promise<HttpLikeResponse<boolean>> => {
+    return await ipcRenderer.invoke("QUIT_APP");
   },
-  openFileExplorer: (folderPath: string): void => {
-    ipcRenderer.send("OPEN_FILE_EXPLORER", folderPath);
+  openFileExplorer: async (folderPath: string): Promise<HttpLikeResponse<boolean>> => {
+    return await ipcRenderer.invoke("OPEN_FILE_EXPLORER", folderPath);
   },
-  runQuickLook: (fullPath: string): void => {
-    ipcRenderer.send("RUN_QUICK_LOOK", fullPath);
+  runQuickLook: async (fullPath: string): Promise<HttpLikeResponse<boolean>> => {
+    return await ipcRenderer.invoke("RUN_QUICK_LOOK", fullPath);
   },
-  startDrag: (fullPath: string): void => {
-    ipcRenderer.send("START_DRAG", fullPath);
-  },
-  getStartingDirectory: async (): Promise<string> => {
+  // startDrag: async (fullPath: string): Promise<HttpLikeResponse<boolean>> => {
+  //   return await ipcRenderer.invoke("START_DRAG", fullPath);
+  // },
+  getStartingDirectory: async (): Promise<HttpLikeResponse<string>> => {
     return await ipcRenderer.invoke("GET_STARTING_DIRECTORY");
   },
-  getFsWinDirectoryContents: async (folderPath: string): Promise<fswin.Find.File[]> => {
+  getFsWinDirectoryContents: async (
+    folderPath: string
+  ): Promise<HttpLikeResponse<fswin.Find.File[]>> => {
+    // TODO: change channel name
     return await ipcRenderer.invoke("GET_FS_WIN_DIRECTORY_CONTENTS", folderPath);
   },
-  getListOfDrives: async (): Promise<fswin.LogicalDriveList> => {
+  getListOfDrives: async (): Promise<HttpLikeResponse<fswin.LogicalDriveList>> => {
     return await ipcRenderer.invoke("GET_LIST_OF_DRIVES");
   },
-  getSmallIcon: async (filePath: string): Promise<string> => {
+  getSmallIcon: async (filePath: string): Promise<HttpLikeResponse<string>> => {
     return await ipcRenderer.invoke("GET_SMALL_ICON", filePath);
   },
-  getLargeIcon: async (filePath: string): Promise<string> => {
+  getLargeIcon: async (filePath: string): Promise<HttpLikeResponse<string>> => {
     return await ipcRenderer.invoke("GET_LARGE_ICON", filePath);
   },
-  doesFileExist: async (fullPath: string): Promise<boolean> => {
-    return await ipcRenderer.invoke("DOES_FILE_EXIST", fullPath);
-  },
-  createNewFolder: async (folderPath: string): Promise<void> => {
+  createNewFolder: async (folderPath: string): Promise<HttpLikeResponse<boolean>> => {
     return await ipcRenderer.invoke("CREATE_NEW_FOLDER", folderPath);
   }
 };
