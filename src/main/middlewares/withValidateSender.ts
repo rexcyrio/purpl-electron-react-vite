@@ -10,7 +10,7 @@ export default function withValidateSender(
       throw new SecurityError("Unauthorized IPC frame source");
     }
 
-    const result = fn(event, args);
+    const result = fn(event, ...args);
     return result;
   }
 

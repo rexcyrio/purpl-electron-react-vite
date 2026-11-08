@@ -7,7 +7,7 @@ export default function withErrorHandler(
 ) {
   function wrapped(event: Electron.IpcMainInvokeEvent, ...args: any[]) {
     try {
-      const result = fn(event, args);
+      const result = fn(event, ...args);
       return result;
     } catch (error) {
       if (error instanceof ZodError) {
