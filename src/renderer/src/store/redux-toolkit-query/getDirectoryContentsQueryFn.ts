@@ -1,3 +1,5 @@
+import convertFsWinDatesToDatetimeString from "./convertFsWinDatesToDatetimeString";
+
 export default async function getDirectoryContentsQueryFn(folderPath: string) {
   try {
     const { status, message, data } = await window.api.getFsWinDirectoryContents(folderPath);
@@ -11,7 +13,7 @@ export default async function getDirectoryContentsQueryFn(folderPath: string) {
       };
     }
 
-    return { data };
+    return { data: convertFsWinDatesToDatetimeString(data) };
   } catch (error) {
     return {
       error: {
