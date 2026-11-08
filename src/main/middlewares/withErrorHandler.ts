@@ -3,11 +3,11 @@ import { SecurityError } from "../exceptions/exceptions";
 import { formatAsBadRequest, formatAsInternalServerError } from "../responses/responses";
 
 export default function withErrorHandler(
-  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any
+  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => Promise<any>
 ) {
-  function wrapped(event: Electron.IpcMainInvokeEvent, ...args: any[]) {
+  async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: any[]) {
     try {
-      const result = fn(event, ...args);
+      const result = await fn(event, ...args);
       return result;
     } catch (error) {
       if (error instanceof ZodError) {

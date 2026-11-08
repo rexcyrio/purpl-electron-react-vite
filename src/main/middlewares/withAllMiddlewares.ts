@@ -2,7 +2,7 @@ import withErrorHandler from "./withErrorHandler";
 import withValidateSender from "./withValidateSender";
 
 export default function withAllMiddlewares(
-  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any
+  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => Promise<any>
 ) {
   const middlewares = [
     withValidateSender,

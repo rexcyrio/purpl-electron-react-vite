@@ -25,18 +25,18 @@ export default class FileExplorerController implements IRegisterHandles {
     return formatAsOk(true);
   };
 
-  createNewFolder = (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  createNewFolder = async (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
     const folderPath = z.string().parse(args[0]);
 
-    this.fileExplorerService.createNewFolder(folderPath);
+    await this.fileExplorerService.createNewFolder(folderPath);
     return formatAsOk(true);
   };
 
-  moveItem = (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  moveItem = async (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
     const fromFullPath = z.string().parse(args[0]);
     const toFullPath = z.string().parse(args[1]);
 
-    this.fileExplorerService.moveItem(fromFullPath, toFullPath);
+    await this.fileExplorerService.moveItem(fromFullPath, toFullPath);
     return formatAsOk(true);
   };
 }
