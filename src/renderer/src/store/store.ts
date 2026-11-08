@@ -1,10 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import isCreateNewFolderDialogOpenReducer from "./slices/isCreateNewFolderDialogOpenSlice";
+import { electronIpcApi } from "./redux-toolkit-query/electronIpcApiSlice";
 import errorSnackbarReducer from "./slices/errorSnackbarSlice";
 import fileExplorerItemsReducer from "./slices/fileExplorerItemsSlice";
+import isCreateNewFolderDialogOpenReducer from "./slices/isCreateNewFolderDialogOpenSlice";
 import isDraggingReducer from "./slices/isDraggingSlice";
-import quickLookReducer from "./slices/quickLookSlice";
 import isReadyReducer from "./slices/isReadySlice";
+import quickLookReducer from "./slices/quickLookSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,8 +14,10 @@ export const store = configureStore({
     isCreateNewFolderDialogOpen: isCreateNewFolderDialogOpenReducer,
     quickLook: quickLookReducer,
     errorSnackbar: errorSnackbarReducer,
-    fileExplorerItems: fileExplorerItemsReducer
-  }
+    fileExplorerItems: fileExplorerItemsReducer,
+    [electronIpcApi.reducerPath]: electronIpcApi.reducer
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(electronIpcApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
