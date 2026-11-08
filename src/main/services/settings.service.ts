@@ -1,11 +1,17 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
 import { KeyError } from "../exceptions/exceptions";
 
 class SettingsService {
   private static filepath = path.win32.join(__filename, "../settings.json");
 
   private data: Record<string, any>;
+
+  private timeout: NodeJS.Timeout | null = null;
+
+  private isSaving = false;
+
+  private isFlushPending = false;
 
   constructor() {
     try {
@@ -43,6 +49,41 @@ class SettingsService {
 
   set(key: string, value: any) {
     this.data[key] = value;
+    this._scheduleSaveToDisk();
+  }
+
+  private _scheduleSaveToDisk() {
+    if (this.isSaving) {
+      this.isFlushPending = true;
+      return;
+    }
+
+    if (this.timeout === null) {
+      this.timeout = setTimeout(() => {
+        this._saveToDisk();
+      }, 1000);
+    }
+  }
+
+  private async _saveToDisk() {
+    this.timeout = null;
+
+    this.isSaving = true;
+    this.isFlushPending = false;
+
+    try {
+      const jsonString = JSON.stringify(this.data, null, 2);
+      await fs.promises.writeFile(SettingsService.filepath, jsonString);
+    } catch (error) {
+      console.error("Failed to save settings to disk:", error);
+    } finally {
+      this.isSaving = false;
+
+      if (this.isFlushPending) {
+        // `this.data` was updated during the write file operation
+        this._scheduleSaveToDisk();
+      }
+    }
   }
 }
 
