@@ -7,101 +7,94 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
-import { createNewFolder, isDuplicateName } from "@renderer/store/slices/fileExplorerItemsSlice";
+import { useAppDispatch } from "@renderer/store/hooks";
+import { useLazyCreateNewFolderQuery } from "@renderer/store/redux-toolkit-query/electronIpcApiSlice";
+import { openErrorSnackbarWithAlertText } from "@renderer/store/slices/errorSnackbarSlice";
+import { ReactToolkitQueryError } from "@renderer/types/types";
 import { stopPropagationToDocument } from "@renderer/utilities/stopPropagationToDocument";
-import React, { useCallback, useMemo, useState } from "react";
-import { setIsCreateNewFolderDialogOpen } from "../../store/slices/isCreateNewFolderDialogOpenSlice";
+import { useCallback, useEffect, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
-function ButtonCreateNewFolder(): JSX.Element {
+const EMPTY_HELPER_TEXT = " ";
+
+export default function ButtonCreateNewFolder() {
   const dispatch = useAppDispatch();
+  const [trigger, { error }] = useLazyCreateNewFolderQuery();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [folderName, setFolderName] = useState("");
+  const [helperText, setHelperText] = useState(EMPTY_HELPER_TEXT);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [helperText, setHelperText] = useState(" ");
-  const [newFolderName, setNewFolderName] = useState("");
 
-  const isDialogOpen = useAppSelector((state) => state.isCreateNewFolderDialogOpen);
+  useEffect(() => {
+    if (error) {
+      dispatch(openErrorSnackbarWithAlertText((error as ReactToolkitQueryError).message));
+    }
+  }, [dispatch, error]);
 
-  const isValid = useCallback(
-    async (_newFolderName: string): Promise<boolean> => {
-      if (_newFolderName === "") {
-        setHelperText("Please provide a folder name");
-        return false;
-      }
-      if (_newFolderName.match(reReservedName)) {
-        setHelperText("Reserved name");
-        return false;
-      }
-      if (_newFolderName.match(reReservedChar)) {
-        setHelperText('Reserved character(s) detected < > : " / \\ | ? * ');
-        return false;
-      }
-      if (_newFolderName.match(reTrailingPeriod)) {
-        setHelperText("Trailing period detected");
-        return false;
-      }
-      if (_newFolderName.match(reTrailingSpace)) {
-        setHelperText("Trailing space detected");
-        return false;
-      }
+  const handleDialogOpen = useCallback(() => {
+    setFolderName("");
+    setHelperText(EMPTY_HELPER_TEXT);
+    setIsDisabled(false);
 
-      const _isDuplicateName = await dispatch(isDuplicateName(_newFolderName));
-      if (_isDuplicateName) {
-        setHelperText("A file or folder with that name already exists");
-        return false;
-      }
+    setIsDialogOpen(true);
+  }, []);
 
-      setHelperText(" ");
-      return true;
+  const handleDialogClose = useCallback(() => {
+    setIsDialogOpen(false);
+  }, []);
+
+  const runValidationOnFolderName = useCallback((_folderName: string) => {
+    const { isValid, errorMessage } = isValidFolderName(_folderName);
+
+    if (isValid) {
+      setHelperText(EMPTY_HELPER_TEXT);
+    } else {
+      setHelperText(errorMessage);
+    }
+
+    return isValid;
+  }, []);
+
+  const handleTextFieldChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+
+      const _folderName = event.target.value;
+      setFolderName(_folderName);
+      runValidationOnFolderName(_folderName);
     },
-    [dispatch]
+    [runValidationOnFolderName]
+  );
+
+  const handleConfirm = useCallback(() => {
+    setIsDisabled(true);
+
+    // TODO: check for duplicate filename
+
+    if (runValidationOnFolderName(folderName)) {
+      trigger("C:\\Users\\Stefan Lee\\Desktop\\test"); // TODO:
+      setIsDialogOpen(false);
+    }
+
+    setIsDisabled(false);
+  }, [folderName, runValidationOnFolderName, trigger]);
+
+  const handleSubmit = useCallback(
+    (event: React.SubmitEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      handleConfirm();
+    },
+    [handleConfirm]
   );
 
   const handleCancel = useCallback(() => {
-    dispatch(setIsCreateNewFolderDialogOpen(false));
-  }, [dispatch]);
+    handleDialogClose();
+  }, [handleDialogClose]);
 
-  const handleConfirm = useCallback(async () => {
-    setIsDisabled(true);
-
-    const _isValid = await isValid(newFolderName);
-
-    if (_isValid) {
-      dispatch(createNewFolder(newFolderName));
-    } else {
-      setIsDisabled(false);
-    }
-  }, [dispatch, isValid, newFolderName]);
-
-  const handleDialogOpen = useCallback(() => {
-    setIsDisabled(false);
-    setHelperText(" ");
-    setNewFolderName("");
-    dispatch(setIsCreateNewFolderDialogOpen(true));
-  }, [dispatch]);
-
-  const handleDialogClose = useCallback(() => {
-    if (isDisabled) {
-      return;
-    }
-
-    handleCancel();
-  }, [handleCancel, isDisabled]);
-
-  function handleTextFieldChange(event: React.ChangeEvent<HTMLInputElement>): void {
-    event.stopPropagation();
-    const _newFolderName = event.target.value;
-    setNewFolderName(_newFolderName);
-    isValid(_newFolderName);
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    handleConfirm();
-  }
-
-  const memoTooltipIconButton = useMemo(
-    () => (
+  return (
+    <>
       <ButtonWrapper>
         <Tooltip title="Create a new folder">
           <IconButton onClick={handleDialogOpen}>
@@ -109,13 +102,6 @@ function ButtonCreateNewFolder(): JSX.Element {
           </IconButton>
         </Tooltip>
       </ButtonWrapper>
-    ),
-    [handleDialogOpen]
-  );
-
-  return (
-    <>
-      {memoTooltipIconButton}
 
       <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="xs" fullWidth>
         <DialogTitle>New Folder</DialogTitle>
@@ -125,12 +111,12 @@ function ButtonCreateNewFolder(): JSX.Element {
             <TextField
               style={{ marginTop: "0.5rem" }}
               label="Name"
-              value={newFolderName}
+              value={folderName}
               onChange={handleTextFieldChange}
               onKeyDown={stopPropagationToDocument}
               fullWidth
               disabled={isDisabled}
-              error={helperText !== " "}
+              error={helperText !== EMPTY_HELPER_TEXT}
               helperText={helperText}
               autoFocus
             />
@@ -150,11 +136,34 @@ function ButtonCreateNewFolder(): JSX.Element {
   );
 }
 
-const reReservedName =
+function isValidFolderName(folderName: string): ValidateFolderNameResult {
+  if (folderName === "") {
+    return { isValid: false, errorMessage: "Please provide a folder name" };
+  }
+  if (folderName.match(regexReservedName)) {
+    return { isValid: false, errorMessage: "Reserved name" };
+  }
+  if (folderName.match(regexReservedChar)) {
+    return { isValid: false, errorMessage: 'Reserved character(s) detected < > : " / \\ | ? * ' };
+  }
+  if (folderName.match(regexTrailingPeriod)) {
+    return { isValid: false, errorMessage: "Trailing period detected" };
+  }
+  if (folderName.match(regexTrailingSpace)) {
+    return { isValid: false, errorMessage: "Trailing space detected" };
+  }
+
+  return { isValid: true, errorMessage: "" };
+}
+
+interface ValidateFolderNameResult {
+  isValid: boolean;
+  errorMessage: string;
+}
+
+const regexReservedName =
   /^(CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9)$|^(CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9)\..*$/;
 
-const reReservedChar = /[<>:"/\\|?*]/;
-const reTrailingPeriod = /^.*\.$/;
-const reTrailingSpace = /^.* $/;
-
-export default React.memo(ButtonCreateNewFolder);
+const regexReservedChar = /[<>:"/\\|?*]/;
+const regexTrailingPeriod = /^.*\.$/;
+const regexTrailingSpace = /^.* $/;

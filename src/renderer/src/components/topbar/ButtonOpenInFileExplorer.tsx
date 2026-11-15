@@ -1,13 +1,12 @@
 import LaunchIcon from "@mui/icons-material/Launch";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { useAppDispatch } from "@renderer/store/hooks";
+import { useLazyOpenFileExplorerQuery } from "@renderer/store/redux-toolkit-query/electronIpcApiSlice";
 import React, { useCallback, useEffect } from "react";
 import ButtonWrapper from "./ButtonWrapper";
-import { openFileExplorer } from "@renderer/store/slices/fileExplorerItemsSlice";
 
-function ButtonOpenInFileExplorer(): JSX.Element {
-  const dispatch = useAppDispatch();
+export default function ButtonOpenInFileExplorer() {
+  const [trigger] = useLazyOpenFileExplorerQuery();
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -18,14 +17,14 @@ function ButtonOpenInFileExplorer(): JSX.Element {
           }
 
           event.preventDefault();
-          dispatch(openFileExplorer());
+          trigger("C:\\Users"); // TODO:
           break;
 
         default:
           break;
       }
     },
-    [dispatch]
+    [trigger]
   );
 
   useEffect(() => {
@@ -33,10 +32,13 @@ function ButtonOpenInFileExplorer(): JSX.Element {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  function handleClick(event: React.MouseEvent<HTMLButtonElement>): void {
-    event.preventDefault();
-    dispatch(openFileExplorer());
-  }
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      trigger("C:\\Users"); // TODO:
+    },
+    [trigger]
+  );
 
   return (
     <ButtonWrapper>
@@ -48,5 +50,3 @@ function ButtonOpenInFileExplorer(): JSX.Element {
     </ButtonWrapper>
   );
 }
-
-export default React.memo(ButtonOpenInFileExplorer);
