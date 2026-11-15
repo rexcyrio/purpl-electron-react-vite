@@ -1,6 +1,6 @@
 import { SecurityError } from "../exceptions/exceptions";
 
-export default function withValidateSender(
+export default function withValidateSenderAsync(
   fn: (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => Promise<unknown>
 ) {
   async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: unknown[]) {

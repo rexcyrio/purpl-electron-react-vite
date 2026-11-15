@@ -2,7 +2,7 @@ import { ZodError } from "zod";
 import { SecurityError } from "../exceptions/exceptions";
 import { formatAsBadRequest, formatAsInternalServerError } from "../responses/responses";
 
-export default function withErrorHandler(
+export default function withErrorHandlerAsync(
   fn: (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => Promise<unknown>
 ) {
   async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: unknown[]) {
