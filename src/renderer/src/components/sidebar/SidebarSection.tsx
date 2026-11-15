@@ -1,12 +1,10 @@
-import PropTypes from "prop-types";
 import React from "react";
 
-SidebarSection.propTypes = {
-  headerName: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired
-};
+type SidebarSectionProps = React.PropsWithChildren<{
+  headerName: string;
+}>;
 
-function SidebarSection({ headerName, children }): JSX.Element {
+export default function SidebarSection({ headerName, children }: SidebarSectionProps) {
   return (
     <>
       <div
@@ -33,5 +31,3 @@ function SidebarSection({ headerName, children }): JSX.Element {
     </>
   );
 }
-
-export default React.memo(SidebarSection);

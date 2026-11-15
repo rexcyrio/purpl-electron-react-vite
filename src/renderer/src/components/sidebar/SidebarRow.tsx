@@ -1,15 +1,16 @@
 import { useAppDispatch } from "@renderer/store/hooks";
 import { navigateToFullPath } from "@renderer/store/slices/fileExplorerItemsSlice";
 import { getDisplayName } from "@renderer/utilities/getDisplayName";
-import PropTypes from "prop-types";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import SidebarRowIcon from "./SidebarRowIcon";
 
-SidebarRow.propTypes = {
-  fullPath: PropTypes.string.isRequired
-};
+const PADDING_SIZE = "0.2rem";
 
-function SidebarRow({ fullPath }): JSX.Element {
+interface SidebarRowProps {
+  fullPath: string;
+}
+
+export default function SidebarRow({ fullPath }: SidebarRowProps) {
   const dispatch = useAppDispatch();
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -22,7 +23,7 @@ function SidebarRow({ fullPath }): JSX.Element {
   }, []);
 
   const handleClick = useCallback(() => {
-    dispatch(navigateToFullPath(fullPath));
+    dispatch(navigateToFullPath(fullPath)); // TODO:
   }, [dispatch, fullPath]);
 
   const displayName = getDisplayName(fullPath);
@@ -57,7 +58,3 @@ function SidebarRow({ fullPath }): JSX.Element {
     </div>
   );
 }
-
-const PADDING_SIZE = "0.2rem";
-
-export default React.memo(SidebarRow);

@@ -1,8 +1,7 @@
-import React from "react";
 import SidebarRow from "./SidebarRow";
 import SidebarSection from "./SidebarSection";
 
-function Sidebar(): JSX.Element {
+export default function Sidebar() {
   return (
     <div
       className="side-bar"
@@ -32,5 +31,3 @@ function Sidebar(): JSX.Element {
     </div>
   );
 }
-
-export default React.memo(Sidebar);

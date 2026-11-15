@@ -1,7 +1,5 @@
 import { getIconType } from "@renderer/utilities/getIconType";
 import type * as CSS from "csstype";
-import PropTypes from "prop-types";
-import React from "react";
 import { FiHardDrive } from "react-icons/fi";
 import {
   IoIosDesktop,
@@ -13,12 +11,12 @@ import {
   IoIosMusicalNotes
 } from "react-icons/io";
 
-SidebarRowIcon.propTypes = {
-  fullPath: PropTypes.string.isRequired,
-  heightWidth: PropTypes.string.isRequired
-};
+interface SidebarRowIconProps {
+  fullPath: string;
+  heightWidth: string;
+}
 
-function SidebarRowIcon({ fullPath, heightWidth }): JSX.Element {
+export default function SidebarRowIcon({ fullPath, heightWidth }: SidebarRowIconProps) {
   const _iconType = getIconType(fullPath);
   const _style: CSS.Properties = {
     height: heightWidth,
@@ -46,5 +44,3 @@ function SidebarRowIcon({ fullPath, heightWidth }): JSX.Element {
       return <FiHardDrive style={_style} />;
   }
 }
-
-export default React.memo(SidebarRowIcon);
