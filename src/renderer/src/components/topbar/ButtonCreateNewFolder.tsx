@@ -43,6 +43,7 @@ export default function ButtonCreateNewFolder() {
   }, []);
 
   const handleDialogClose = useCallback(() => {
+    inputRef.current?.blur();
     setIsDialogOpen(false);
   }, []);
 
