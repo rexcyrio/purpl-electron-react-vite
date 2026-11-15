@@ -34,7 +34,7 @@
     "@electron/notarize": "^3.1.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.5",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
     "@reduxjs/toolkit": "^2.13.0",
