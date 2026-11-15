@@ -1,11 +1,10 @@
-import PropTypes from "prop-types";
 import React from "react";
 
-ButtonWrapper.propTypes = {
-  children: PropTypes.node.isRequired
-};
+interface ButtonWrapperProps {
+  children: React.ReactNode;
+}
 
-function ButtonWrapper({ children }): JSX.Element {
+export default function ButtonWrapper({ children }: ButtonWrapperProps) {
   return (
     <div
       style={{
@@ -16,5 +15,3 @@ function ButtonWrapper({ children }): JSX.Element {
     </div>
   );
 }
-
-export default React.memo(ButtonWrapper);

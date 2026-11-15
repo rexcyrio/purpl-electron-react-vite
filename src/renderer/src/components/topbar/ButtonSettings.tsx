@@ -5,11 +5,11 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useCallback, useState } from "react";
-import ButtonWrapper from "./ButtonWrapper";
 import { useAppDispatch } from "@renderer/store/hooks";
+import { useCallback, useState } from "react";
+import ButtonWrapper from "./ButtonWrapper";
 
-function ButtonSettings(): JSX.Element {
+export default function ButtonSettings() {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
 
@@ -57,5 +57,3 @@ function ButtonSettings(): JSX.Element {
     </>
   );
 }
-
-export default React.memo(ButtonSettings);

@@ -34,13 +34,13 @@ export default function ButtonHelpWindow() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  function handleDialogOpen(): void {
+  const handleDialogOpen = useCallback(() => {
     setDialogOpen(true);
-  }
+  }, []);
 
-  function handleDialogClose(): void {
+  const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
-  }
+  }, []);
 
   return (
     <>
