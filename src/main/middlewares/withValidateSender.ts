@@ -1,9 +1,9 @@
 import { SecurityError } from "../exceptions/exceptions";
 
 export default function withValidateSender(
-  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => Promise<any>
+  fn: (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => Promise<unknown>
 ) {
-  async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: any[]) {
+  async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: unknown[]) {
     const senderUrl = event.senderFrame?.url || "";
 
     if (senderUrl !== "http://localhost:5173/") {

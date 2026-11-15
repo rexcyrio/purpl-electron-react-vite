@@ -3,9 +3,9 @@ import { SecurityError } from "../exceptions/exceptions";
 import { formatAsBadRequest, formatAsInternalServerError } from "../responses/responses";
 
 export default function withErrorHandler(
-  fn: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => Promise<any>
+  fn: (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => Promise<unknown>
 ) {
-  async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: any[]) {
+  async function wrapped(event: Electron.IpcMainInvokeEvent, ...args: unknown[]) {
     try {
       const result = await fn(event, ...args);
       return result;

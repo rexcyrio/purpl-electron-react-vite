@@ -16,7 +16,7 @@ export default class QuickLookController implements IRegisterHandles {
     ipcMain.handle("RUN_QUICK_LOOK", withAllMiddlewares(this.runQuickLook));
   }
 
-  runQuickLook = async (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  runQuickLook = async (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     const fullPath = z.string().parse(args[0]);
 
     await this.quickLookService.runQuickLook(fullPath);

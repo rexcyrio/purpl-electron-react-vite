@@ -18,13 +18,13 @@ export default class FsWinController implements IRegisterHandles {
     ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", withAllMiddlewares(this.getDirectoryContents));
   }
 
-  getListOfDrives = async (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  getListOfDrives = async (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     const data = await this.fsWinService.getListOfDrives();
 
     return formatAsOk(data);
   };
 
-  getDirectoryContents = async (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  getDirectoryContents = async (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     const folderPath = z.string().parse(args[0]);
 
     const data = await this.fsWinService.getDirectoryContents(folderPath);

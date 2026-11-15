@@ -17,14 +17,14 @@ export default class IconsController implements IRegisterHandles {
     ipcMain.handle("GET_LARGE_ICON", withAllMiddlewares(this.getLargeIcon));
   }
 
-  getSmallIcon = (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  getSmallIcon = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     const fullPath = z.string().parse(args[0]);
 
     const dataUrl = this.iconsService.getSmallIcon(fullPath);
     return formatAsOk(dataUrl);
   };
 
-  getLargeIcon = (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  getLargeIcon = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     const fullPath = z.string().parse(args[0]);
 
     const dataUrl = this.iconsService.getLargeIcon(fullPath);

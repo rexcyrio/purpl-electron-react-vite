@@ -15,7 +15,7 @@ export default class SystemController implements IRegisterHandles {
     ipcMain.handle("QUIT_APP", withAllMiddlewares(this.quitApp));
   }
 
-  quitApp = (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+  quitApp = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
     this.systemService.quitApp();
     return formatAsOk(true);
   };

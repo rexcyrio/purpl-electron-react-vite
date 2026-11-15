@@ -1,6 +1,6 @@
 import { AssertionError } from "../exceptions/exceptions";
 
-export function assertTrue(value: any) {
+export function assertTrue(value: unknown) {
   if (value !== true) {
     throw new AssertionError();
   }

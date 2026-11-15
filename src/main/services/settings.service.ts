@@ -5,7 +5,7 @@ import { KeyError } from "../exceptions/exceptions";
 class SettingsService {
   private static filepath = path.win32.join(__filename, "../settings.json");
 
-  private data: Record<string, any>;
+  private data: Record<string, unknown>;
 
   private timeout: NodeJS.Timeout | null = null;
 
@@ -47,7 +47,7 @@ class SettingsService {
     throw new KeyError(`The key '${key}' does not exist in settings.json`);
   }
 
-  set(key: string, value: any) {
+  set(key: string, value: unknown) {
     this.data[key] = value;
     this._scheduleSaveToDisk();
   }
