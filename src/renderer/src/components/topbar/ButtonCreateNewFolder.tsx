@@ -12,7 +12,7 @@ import { useLazyCreateNewFolderQuery } from "@renderer/store/redux-toolkit-query
 import { openErrorSnackbarWithAlertText } from "@renderer/store/slices/errorSnackbarSlice";
 import { ReactToolkitQueryError } from "@renderer/types/types";
 import { stopPropagationToDocument } from "@renderer/utilities/stopPropagationToDocument";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
 const EMPTY_HELPER_TEXT = " ";
@@ -20,6 +20,7 @@ const EMPTY_HELPER_TEXT = " ";
 export default function ButtonCreateNewFolder() {
   const dispatch = useAppDispatch();
   const [trigger, { error }] = useLazyCreateNewFolderQuery();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -103,12 +104,25 @@ export default function ButtonCreateNewFolder() {
         </Tooltip>
       </ButtonWrapper>
 
-      <Dialog open={isDialogOpen} onClose={handleDialogClose} maxWidth="xs" fullWidth>
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          transition: {
+            onEntered: () => {
+              inputRef.current?.focus();
+            }
+          }
+        }}
+      >
         <DialogTitle>New Folder</DialogTitle>
 
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <TextField
+              inputRef={inputRef}
               style={{ marginTop: "0.5rem" }}
               label="Name"
               value={folderName}
