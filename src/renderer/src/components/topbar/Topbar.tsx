@@ -26,7 +26,7 @@ export default function Topbar() {
           marginRight: "0.25rem"
         }}
       />
-      <ButtonQuickLook />
+      {/* <ButtonQuickLook /> */}
     </div>
   );
 }
