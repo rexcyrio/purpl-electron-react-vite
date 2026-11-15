@@ -1,6 +1,7 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { BrowserWindow, app, ipcMain, nativeImage, shell } from "electron";
+import { BrowserWindow, app, ipcMain, nativeImage, session, shell } from "electron";
 import { Jimp } from "jimp";
+import os from "os";
 import path from "path";
 import icon from "../../resources/icon.png?asset";
 import { assertTrue } from "./assertions/assertions";
@@ -51,22 +52,36 @@ function createMainWindow() {
 }
 
 async function installDeveloperExtensions() {
-  const electronDevToolsExtension = await import("electron-devtools-installer");
+  const extensions = [
+    {
+      name: "React Developer Tools",
+      id: "fmkadmapgofadopljbjfkapdkoienihi",
+      version: "8.0.0_0"
+    },
+    {
+      name: "Redux DevTools",
+      id: "lmhkpmbekcpmknklioeibfkpmmfibljd",
+      version: "3.2.12_0"
+    }
+  ];
 
-  const installExtension = electronDevToolsExtension.default;
-  const { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = electronDevToolsExtension;
+  for (const extension of extensions) {
+    const fullPath = path.join(
+      os.homedir(),
+      "AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions",
+      extension.id,
+      extension.version
+    );
 
-  try {
-    await sleep(1);
-
-    installExtension(REACT_DEVELOPER_TOOLS);
-    installExtension(REDUX_DEVTOOLS);
-    MAIN_WINDOW.webContents.openDevTools();
-
-    console.log("\n*** Developer extensions installed successfully ***\n");
-  } catch (error) {
-    console.error(`\n*** Developer extensions failed to install due to: ***\n`, error);
+    try {
+      await session.defaultSession.extensions.loadExtension(fullPath);
+      console.log(`\n*** ${extension.name} installed successfully ***\n`);
+    } catch (error) {
+      console.error(`\n*** ${extension.name} failed to install due to: ***\n`, error);
+    }
   }
+
+  MAIN_WINDOW.webContents.openDevTools();
 }
 
 async function sleep(ms: number) {
