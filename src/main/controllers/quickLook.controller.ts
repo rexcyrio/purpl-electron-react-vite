@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import { z } from "zod";
-import withAllMiddlewares from "../middlewares/withAllMiddlewares";
+import withAllMiddlewaresAsync from "../middlewares/withAllMiddlewaresAsync";
 import { formatAsOk } from "../responses/responses";
 import QuickLookService from "../services/quickLook.service";
 import IRegisterHandles from "./IRegisterHandles";
@@ -13,7 +13,7 @@ export default class QuickLookController implements IRegisterHandles {
   }
 
   registerHandles(): void {
-    ipcMain.handle("RUN_QUICK_LOOK", withAllMiddlewares(this.runQuickLook));
+    ipcMain.handle("RUN_QUICK_LOOK", withAllMiddlewaresAsync(this.runQuickLook));
   }
 
   runQuickLook = async (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {

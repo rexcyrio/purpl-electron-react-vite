@@ -1,9 +1,10 @@
 import { ipcMain } from "electron";
 import { z } from "zod";
 import withAllMiddlewares from "../middlewares/withAllMiddlewares";
+import withAllMiddlewaresAsync from "../middlewares/withAllMiddlewaresAsync";
+import { formatAsOk } from "../responses/responses";
 import FileExplorerService from "../services/fileExplorer.service";
 import IRegisterHandles from "./IRegisterHandles";
-import { formatAsOk } from "../responses/responses";
 
 export default class FileExplorerController implements IRegisterHandles {
   private fileExplorerService: FileExplorerService;
@@ -14,8 +15,8 @@ export default class FileExplorerController implements IRegisterHandles {
 
   registerHandles(): void {
     ipcMain.handle("OPEN_FILE_EXPLORER", withAllMiddlewares(this.openFileExplorer));
-    ipcMain.handle("CREATE_NEW_FOLDER", withAllMiddlewares(this.createNewFolder));
-    ipcMain.handle("MOVE_ITEM", withAllMiddlewares(this.moveItem));
+    ipcMain.handle("CREATE_NEW_FOLDER", withAllMiddlewaresAsync(this.createNewFolder));
+    ipcMain.handle("MOVE_ITEM", withAllMiddlewaresAsync(this.moveItem));
   }
 
   openFileExplorer = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {

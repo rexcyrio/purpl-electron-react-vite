@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import { z } from "zod";
-import withAllMiddlewares from "../middlewares/withAllMiddlewares";
+import withAllMiddlewaresAsync from "../middlewares/withAllMiddlewaresAsync";
 import { formatAsOk } from "../responses/responses";
 import FsWinService from "../services/fsWin.service";
 import IRegisterHandles from "./IRegisterHandles";
@@ -13,9 +13,9 @@ export default class FsWinController implements IRegisterHandles {
   }
 
   registerHandles(): void {
-    ipcMain.handle("GET_LIST_OF_DRIVES", withAllMiddlewares(this.getListOfDrives));
+    ipcMain.handle("GET_LIST_OF_DRIVES", withAllMiddlewaresAsync(this.getListOfDrives));
     // TODO: rename channel name
-    ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", withAllMiddlewares(this.getDirectoryContents));
+    ipcMain.handle("GET_FS_WIN_DIRECTORY_CONTENTS", withAllMiddlewaresAsync(this.getDirectoryContents));
   }
 
   getListOfDrives = async (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => {
