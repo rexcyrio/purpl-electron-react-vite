@@ -7,10 +7,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ButtonWrapper from "./ButtonWrapper";
 
-function ButtonHelpWindow(): JSX.Element {
+export default function ButtonHelpWindow() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -86,5 +86,3 @@ function ButtonHelpWindow(): JSX.Element {
     </>
   );
 }
-
-export default React.memo(ButtonHelpWindow);

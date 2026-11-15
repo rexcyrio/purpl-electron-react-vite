@@ -1,11 +1,11 @@
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import Snackbar from "@mui/material/Snackbar";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { closeErrorSnackbar } from "./store/slices/errorSnackbarSlice";
 
-function ErrorSnackbar(): JSX.Element {
+export default function ErrorSnackbar() {
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.errorSnackbar.isOpen);
   const alertText = useAppSelector((state) => state.errorSnackbar.alertText);
@@ -31,5 +31,3 @@ function ErrorSnackbar(): JSX.Element {
     </Snackbar>
   );
 }
-
-export default React.memo(ErrorSnackbar);

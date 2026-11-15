@@ -1,12 +1,11 @@
 import Divider from "@mui/material/Divider";
-import React from "react";
 import ButtonCreateNewFolder from "./ButtonCreateNewFolder";
 import ButtonHelpWindow from "./ButtonHelpWindow";
 import ButtonOpenInFileExplorer from "./ButtonOpenInFileExplorer";
 import ButtonQuickLook from "./ButtonQuickLook";
 import ButtonSettings from "./ButtonSettings";
 
-function Topbar(): JSX.Element {
+export default function Topbar() {
   return (
     <div
       className="top-bar"
@@ -31,5 +30,3 @@ function Topbar(): JSX.Element {
     </div>
   );
 }
-
-export default React.memo(Topbar);

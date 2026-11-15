@@ -1,14 +1,13 @@
 import { useAppDispatch, useAppSelector } from "@renderer/store/hooks";
 import { selectNumberOfNonBlankColumns } from "@renderer/store/selectors/selectNumberOfNonBlankColumns";
 import { removeColumnsToTheRightOf } from "@renderer/store/slices/fileExplorerItemsSlice";
-import PropTypes from "prop-types";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-ColumnBlank.propTypes = {
-  columnIndex: PropTypes.number.isRequired
-};
+interface ColumnBlankProps {
+  columnIndex: number;
+}
 
-function ColumnBlank({ columnIndex }): JSX.Element {
+export default function ColumnBlank({ columnIndex }: ColumnBlankProps) {
   const dispatch = useAppDispatch();
   const columnBlankRef = useRef<HTMLDivElement | null>(null);
   const numNonBlankColumns = useAppSelector(selectNumberOfNonBlankColumns);
@@ -37,5 +36,3 @@ function ColumnBlank({ columnIndex }): JSX.Element {
     </div>
   );
 }
-
-export default React.memo(ColumnBlank);
