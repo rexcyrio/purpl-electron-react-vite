@@ -21,7 +21,10 @@ export const errorSnackbarSlice = createSlice({
       state.alertText = alertText;
       return state;
     },
-    closeErrorSnackbar: (state) => initialState
+    closeErrorSnackbar: (state) => {
+      state.isOpen = false;
+      return state;
+    }
   }
 });
 
